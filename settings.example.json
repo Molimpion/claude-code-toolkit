@@ -27,6 +27,16 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/block-secrets-in-prompt.py"
+          }
+        ]
+      }
     ]
   }
 }
