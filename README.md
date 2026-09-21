@@ -28,6 +28,7 @@ As skills são agnósticas de stack: detectam a linguagem em runtime e leem o co
 ## Guardrails
 
 - **Permissões** (`settings.example.json`): qualquer comando git que altera histórico (commit, push, merge, rebase, reset, checkout, branch, stash) exige confirmação.
+- **Bloqueio de leitura de segredos:** regras `deny` impedem o agente de ler `.env`, variações e a pasta `secrets/`, mesmo que ele tente. A regra do `CLAUDE.md` pede; a permissão garante.
 - **Hook PostToolUse:** registra em log cada arquivo que o agente escreve ou edita.
 - **`CLAUDE.md` global:** regras de trabalho do agente. Entre elas: parar quando inventar uma regra de negócio, nunca pular ou apagar teste que falha, não alterar credenciais e não instalar dependência sem perguntar.
 - **Devcontainers com token de escopo mínimo** (guia em [`docs/devcontainer.md`](docs/devcontainer.md), procedimento do token em [`docs/runbook-gh-token.md`](docs/runbook-gh-token.md)): o agente roda isolado, com um token GitHub fine-grained limitado aos repositórios necessários.

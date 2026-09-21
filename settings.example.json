@@ -9,6 +9,11 @@
       "Bash(git reset:*)",
       "Bash(git branch:*)",
       "Bash(git stash:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)"
     ]
   },
   "hooks": {
