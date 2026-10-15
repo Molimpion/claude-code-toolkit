@@ -93,8 +93,8 @@ O `gh auth setup-git` precisa ficar no `postCreateCommand` porque o
 `~/.gitconfig` do container não persiste entre recriações.
 
 **Este trecho é o mínimo, não o literal.** Projetos existentes encadeiam mais
-coisa no mesmo `postCreateCommand` (o `notif-api`, por exemplo, ajusta permissão
-do `@anthropic-ai` depois). Ao aplicar em projeto que já existe, **acrescente**
+coisa no mesmo `postCreateCommand` (um projeto Node, por exemplo, pode ajustar a
+permissão do `@anthropic-ai` depois). Ao aplicar em projeto que já existe, **acrescente**
 ao comando atual em vez de substituí-lo.
 
 Cuidado com o encadeamento por `&&`: se o `gh auth setup-git` falhar (token
@@ -147,8 +147,8 @@ no repositório, não no global: o `.git/config` fica no bind mount do workspace
 e sobrevive ao `dcr`.
 
 ```bash
-git config --local user.name "Manoel Olímpio"
-git config --local user.email "olimpiommelo@gmail.com"
+git config --local user.name "Seu Nome"
+git config --local user.email "voce@exemplo.com"
 ```
 
 **`gh` falha com erro de autenticação dentro do container.**
