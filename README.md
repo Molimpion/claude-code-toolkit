@@ -35,6 +35,10 @@ As skills são agnósticas de stack: detectam a linguagem em runtime e leem o co
 - **`CLAUDE.md` global:** regras de trabalho do agente. Entre elas: parar quando inventar uma regra de negócio, nunca pular ou apagar teste que falha, não alterar credenciais e não instalar dependência sem perguntar.
 - **Devcontainers com token de escopo mínimo** (guia em [`docs/devcontainer.md`](docs/devcontainer.md), procedimento do token em [`docs/runbook-gh-token.md`](docs/runbook-gh-token.md)): o agente roda isolado, com um token GitHub fine-grained limitado aos repositórios necessários.
 
+## Memória entre sessões
+
+A pasta [`ai-memory/`](ai-memory/) roda o [ai-memory](https://github.com/akitaonrails/ai-memory) num container próprio e o liga aos devcontainers: hooks registram cada sessão, a seguinte recebe um resumo do que ficou em aberto e o agente pesquisa a memória por MCP. Os atalhos `dc`/`dcr`/`dcsh` de [`ai-memory/dc.sh`](ai-memory/dc.sh) ligam o container à rede do servidor e passam a chave, sem configuração por projeto. Um filtro garante que prompt barrado por conter segredo não seja gravado. Riscos e instalação no [README da pasta](ai-memory/README.md).
+
 ## Como usar
 
 ```bash
@@ -46,4 +50,4 @@ Mescle `settings.example.json` ao seu `~/.claude/settings.json` e adapte o `CLAU
 
 ## Créditos e licença
 
-`tdd`, `arch-review`, `codebase-design` e `grilling` são adaptações de [mattpocock/skills](https://github.com/mattpocock/skills), sob licença MIT (ver `THIRD_PARTY_LICENSES/`). O restante é distribuído sob licença MIT (ver `LICENSE`).
+`tdd`, `arch-review`, `codebase-design` e `grilling` são adaptações de [mattpocock/skills](https://github.com/mattpocock/skills), sob licença MIT (ver `THIRD_PARTY_LICENSES/`). A integração em `ai-memory/` usa o [ai-memory](https://github.com/akitaonrails/ai-memory), de [Fabio Akita](https://github.com/akitaonrails), também MIT; nenhum código dele é distribuído aqui, os scripts de hook são extraídos da imagem oficial na instalação. O restante é distribuído sob licença MIT (ver `LICENSE`).

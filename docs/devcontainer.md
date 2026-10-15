@@ -158,6 +158,9 @@ dcsh() {
 | `dcr` | **recria** o container e abre o Claude | mudou o `devcontainer.json`, ou algo do `postCreateCommand` sumiu |
 | `dcsh` | sobe (ou reaproveita) e abre um shell | validar, diagnosticar, `gh auth status` |
 
+> Usando a memória entre sessões de [`ai-memory/`](../ai-memory/README.md), troque estas funções
+> por `source <caminho>/ai-memory/dc.sh`: mesmos nomes e mesmo uso, mais a ligação com o servidor.
+
 **A regra que explica metade dos problemas:** o `postCreateCommand` só roda quando
 o container é **criado**. O `dc` reaproveita o container existente, então não
 reaplica nada. Tudo que o `postCreateCommand` escreve fora do bind mount
