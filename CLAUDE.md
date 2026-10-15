@@ -29,6 +29,13 @@ Comunicação sempre em **português do Brasil**.
   shell (`cat >`, script, redirecionamento) e arquivo fora do repositório
   (`~/.claude/`, `/tmp`), que não aparecem no `git status`. Se nada foi tocado,
   não escreva nada.
+- **Mostre como ler o diff.** Todo turno que deixou mudança sem commit traz, antes
+  da lista de arquivos tocados, uma lista numerada de comandos `git diff <arquivo>`
+  na ordem de leitura sugerida — do comportamento para os testes e depois a
+  documentação —, cada um com uma frase curta dizendo o que aquele diff mostra.
+  Arquivo gerado (ex.: `openapi.json`) entra numa linha à parte dizendo que pode
+  ser pulado. A lista de arquivos tocados continua sendo inventário; a explicação
+  fica aqui.
 - **Mostre o comando git antes de rodar.** Qualquer comando que altere o
   repositório (commit, push, merge, rebase, checkout, reset, branch, stash)
   aparece na resposta antes da execução, escrito na íntegra. Comando de leitura
@@ -94,6 +101,12 @@ Comunicação sempre em **português do Brasil**.
 - **Teste que falha se conserta, não se apaga nem se pula.** `.skip`, `.only` e
   ajuste de asserção pra passar são proibidos. Se o teste está errado, diga por quê
   antes de mudá-lo.
+- **Teste que passa precisa poder falhar.** A asserção diz exatamente o que espera:
+  erro pela mensagem ou pelo código, nunca `toThrow()` vazio; resultado
+  determinístico pelo valor exato, não por negação. Negação só quando o requisito é
+  uma ausência (dado sensível que não pode aparecer). Antes de considerar a regra
+  testada, quebre-a de propósito (apague o `if`, troque `>=` por `>`) e confira que
+  algum teste fica vermelho. Se nenhum fica, o teste está fraco.
 - **Nada de dead code nem feature pela metade.** Se precisar deixar algo pra
   depois, marque como TODO com o motivo, não deixe função vazia.
 
