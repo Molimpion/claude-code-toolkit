@@ -111,6 +111,26 @@ yarn, ele falha — registrar isso, não tratar como zero vulnerabilidades.
 
 ---
 
+## Step 2b — CI (GitHub Actions)
+
+Só se existir `.github/workflows/`. Workflow roda com os secrets do repositório:
+é superfície de supply chain e entra na cobertura como A08.
+
+| Padrão | Severidade | Por quê |
+|---|---|---|
+| `pull_request_target` com checkout do código do PR (`ref:` apontando para `github.event.pull_request.head.*`) | CRITICAL | Quem abre o PR executa código com os secrets. Sem esse checkout, o gatilho roda o código da branch base e não é achado |
+| Texto controlado por quem abre PR ou issue interpolado em `run:` com `${{ }}` (`title`, `body`, `head.ref`, `github.head_ref`, `comment.body`, mensagem de commit) | HIGH | O valor é substituído antes de o shell rodar: injeção de comando. Correção: passar por `env:` e usar `"$VAR"`. Número e SHA não são controláveis e não são achado |
+| `permissions: write-all` | MEDIUM | Qualquer falha no workflow ganha escrita no repositório |
+| `permissions:` ausente | INFO | A permissão do token depende da configuração do repositório, invisível no código |
+
+```bash
+ls .github/workflows/ 2>/dev/null
+grep -n "pull_request_target\|head\.sha\|head\.ref\|permissions:\|write-all" .github/workflows/*.y*ml
+grep -n '\${{ *github\.\(event\.\|head_ref\)' .github/workflows/*.y*ml
+```
+
+---
+
 ## Step 3 — Varredura por categoria (OWASP Top 10 como espinha)
 
 Marcar cada categoria como coberta, não-aplicável ou não-verificável. O relatório
