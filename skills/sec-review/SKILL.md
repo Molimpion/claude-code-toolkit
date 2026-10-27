@@ -34,6 +34,10 @@ casamento de padrão.
    antes de virar achado. Sem exceção.
 5. **Nunca aplicar patch.** Propor com antes/depois e deixar a decisão com o
    usuário.
+6. **Ferramenta que não rodou é lacuna, não aprovação.** Comando ausente, sem
+   rede, sem lockfile ou com erro → registrar "não verificado" e o motivo na
+   seção correspondente do relatório e na cobertura. Nunca omitir a seção nem
+   escrever zero achados para o que não foi verificado.
 
 ---
 
@@ -87,6 +91,10 @@ sinalizar que a checagem de CVE não foi feita — **não inventar CVE**.
 
 Regras: só reportar com advisory identificado (CVE/GHSA). Citar a versão
 instalada, não o range do manifesto. DevDependency sem uso em runtime → INFO.
+
+Se a checagem não rodar (princípio 6), A06 fica **não-verificável** na
+cobertura. O `npm audit` exige `package-lock.json`: com lockfile de pnpm ou
+yarn, ele falha — registrar isso, não tratar como zero vulnerabilidades.
 
 ---
 
