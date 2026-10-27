@@ -106,7 +106,11 @@ Comunicação sempre em **português do Brasil**.
   determinístico pelo valor exato, não por negação. Negação só quando o requisito é
   uma ausência (dado sensível que não pode aparecer). Antes de considerar a regra
   testada, quebre-a de propósito (apague o `if`, troque `>=` por `>`) e confira que
-  algum teste fica vermelho. Se nenhum fica, o teste está fraco.
+  algum teste fica vermelho. Se nenhum fica, o teste está fraco. Quando a
+  mudança faz uma consulta que já existia devolver mais dado, os filtros
+  antigos dela (dono, conta ativa, situação, cada lado de uma lista) também são
+  quebrados de propósito: o dado que passa a sair aumenta o custo de o filtro
+  sumir, e nenhum teste novo o cobre sozinho.
 - **Nada de dead code nem feature pela metade.** Se precisar deixar algo pra
   depois, marque como TODO com o motivo, não deixe função vazia.
 
