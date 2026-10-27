@@ -43,8 +43,12 @@ A pasta [`ai-memory/`](ai-memory/) roda o [ai-memory](https://github.com/akitaon
 
 ```bash
 git clone https://github.com/Molimpion/claude-code-toolkit.git
-ln -s "$(pwd)/claude-code-toolkit/skills" ~/.claude/skills
+cd claude-code-toolkit
+mkdir -p ~/.claude/skills
+for s in "$(pwd)"/skills/*/; do ln -s "${s%/}" ~/.claude/skills/; done
 ```
+
+Cada skill vira um symlink próprio dentro de `~/.claude/skills/`, em vez de a pasta inteira apontar para o repo: o Claude Code grava ali as skills sincronizadas da conta (`synced/`), e elas não podem cair dentro do repositório. Se já existir em `~/.claude/skills/` uma skill com o mesmo nome, remova-a antes; caso contrário o link é criado dentro dela.
 
 Mescle `settings.example.json` ao seu `~/.claude/settings.json` e adapte o `CLAUDE.md` ao seu contexto antes de copiá-lo para `~/.claude/`.
 
