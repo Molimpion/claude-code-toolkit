@@ -116,16 +116,22 @@ export AI_MEMORY_AUTH__RECOVERY_TOKEN="$(openssl rand -hex 32)"
 docker compose up -d --force-recreate
 
 read -rs -p "nova senha root (12+ caracteres): " P; echo
+P_JSON=${P//\\/\\\\}; P_JSON=${P_JSON//\"/\\\"}
 curl -sS -o /dev/null -w '%{http_code}\n' -X POST http://127.0.0.1:49374/auth/recovery \
-  -H 'content-type: application/json' \
-  -d '{"recovery_token":"'"$AI_MEMORY_AUTH__RECOVERY_TOKEN"'","new_password":"'"$P"'","new_password_confirmation":"'"$P"'"}'
-unset P AI_MEMORY_AUTH__RECOVERY_TOKEN
+  -H 'content-type: application/json' --data-binary @- <<EOF
+{"recovery_token":"$AI_MEMORY_AUTH__RECOVERY_TOKEN","new_password":"$P_JSON","new_password_confirmation":"$P_JSON"}
+EOF
+unset P P_JSON AI_MEMORY_AUTH__RECOVERY_TOKEN
 docker compose up -d --force-recreate
 ```
 
 O `curl` precisa responder `204`. O token de recuperação só existe nesse terminal: com ele, o
 servidor aceita partir sem root e o `POST /auth/recovery` cria o root com a senha nova. O último
 `up` recria o container sem o token.
+
+O corpo vai pela entrada padrão (`--data-binary @-` com heredoc), não como argumento: a senha e o
+token não aparecem na lista de processos (`ps`). A linha do `P_JSON` escapa `\` e `"`, para que
+esses caracteres na senha não quebrem o JSON.
 
 O que os hooks não conseguiram entregar durante o loop fica em `~/.local/share/ai-memory/hook-spool/`
 do lado de quem rodou o hook, e é reenviado sozinho na próxima entrega bem-sucedida. O spool de um
