@@ -42,11 +42,13 @@ A pasta [`ai-memory/`](ai-memory/) roda o [ai-memory](https://github.com/akitaon
 ## Como usar
 
 ```bash
-git clone https://github.com/Molimpion/claude-code-toolkit.git
-cd claude-code-toolkit
+git clone https://github.com/Molimpion/claude-code-toolkit.git ~/.claude/toolkit
 mkdir -p ~/.claude/skills
-for s in "$(pwd)"/skills/*/; do ln -s "${s%/}" ~/.claude/skills/; done
+cd ~/.claude/skills
+for s in ../toolkit/skills/*/; do n=$(basename "$s"); ln -s "../toolkit/skills/$n" "$n"; done
 ```
+
+O clone fica dentro de `~/.claude` e os links são relativos para funcionarem também nos devcontainers, que montam só `~/.claude`: um link para fora dessa pasta aponta para um caminho que não existe dentro do container, e as skills somem sem aviso.
 
 Cada skill vira um symlink próprio dentro de `~/.claude/skills/`, em vez de a pasta inteira apontar para o repo: o Claude Code grava ali as skills sincronizadas da conta (`synced/`), e elas não podem cair dentro do repositório. Se já existir em `~/.claude/skills/` uma skill com o mesmo nome, remova-a antes; caso contrário o link é criado dentro dela.
 
