@@ -13,6 +13,9 @@ services:
     environment:
       AI_MEMORY_ALLOWED_HOSTS: "localhost,127.0.0.1,::1,ai-memory"
       AI_MEMORY_PROFILE__ENABLED: "true"
+      AI_MEMORY_AUTH__SECURE_COOKIE: "true"
+      AI_MEMORY_AUTH__INITIAL_ROOT_PASSWORD: ${AI_MEMORY_AUTH__INITIAL_ROOT_PASSWORD:-}
+      AI_MEMORY_AUTH__RECOVERY_TOKEN: ${AI_MEMORY_AUTH__RECOVERY_TOKEN:-}
     networks:
       - ai-memory
     healthcheck:

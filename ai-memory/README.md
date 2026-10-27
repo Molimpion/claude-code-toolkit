@@ -45,7 +45,12 @@ cd ai-memory
 
 mkdir -p data
 docker compose run --rm --no-deps ai-memory init
+
+read -rs -p "senha root (12+ caracteres): " AI_MEMORY_AUTH__INITIAL_ROOT_PASSWORD; echo
+export AI_MEMORY_AUTH__INITIAL_ROOT_PASSWORD
 docker compose up -d
+unset AI_MEMORY_AUTH__INITIAL_ROOT_PASSWORD
+docker compose up -d --force-recreate
 
 docker exec ai-memory ai-memory user add-human --username claude --json >/dev/null
 docker exec ai-memory ai-memory user disable claude --yes
@@ -62,20 +67,69 @@ echo "source $(pwd)/dc.sh" >> ~/.bashrc
 
 Em ordem:
 
-1. `init` cria `data/` com a configuração e a senha root. A senha root nunca sai de `data/`, que
-   está no `.gitignore`.
-2. Cria o usuário `claude`, com login web desligado, e uma chave `aim_` para ele, salva em
+1. `init` cria `data/` com a configuração e o bearer root. O bearer nunca sai de `data/`, que está
+   no `.gitignore`.
+2. A primeira partida cria o usuário humano `root` com a senha digitada. O `read -s` não mostra a
+   senha nem a grava no histórico. Ela só vale nessa partida: o servidor ignora a variável depois,
+   e o segundo `up` recria o container sem ela no ambiente. Guarde a senha num gerenciador de
+   senhas; ela não é usada no dia a dia. Por que esse passo existe: ver [Root obrigatório](#root-obrigatório).
+3. Cria o usuário `claude`, com login web desligado, e uma chave `aim_` para ele, salva em
    `~/.config/ai-memory/chave` com permissão `0600`. A chave lê e escreve memória, mas não acessa
    `/admin`.
-3. `instalar-hooks.sh` copia os hooks da imagem para `~/.claude/ai-memory/hooks/` e adiciona uma
+4. `instalar-hooks.sh` copia os hooks da imagem para `~/.claude/ai-memory/hooks/` e adiciona uma
    entrada por evento ao `settings.json`, sem tocar nos outros hooks. Antes, salva uma cópia do
    arquivo.
-4. Registra o MCP. As aspas simples guardam o texto `${...}`: o Claude Code troca pelos valores que
+5. Registra o MCP. As aspas simples guardam o texto `${...}`: o Claude Code troca pelos valores que
    o `dc` passa, então a chave nunca fica escrita na configuração.
-5. Carrega o `dc.sh` no shell. Se o `~/.bashrc` já define `dc`/`dcr`/`dcsh`, remova as definições
+6. Carrega o `dc.sh` no shell. Se o `~/.bashrc` já define `dc`/`dcr`/`dcsh`, remova as definições
    antigas.
 
 Abra um terminal novo e use `dc` como sempre.
+
+## Root obrigatório
+
+O `user add-human` sempre grava uma senha, mesmo para o `claude`, que fica com login desligado.
+Existir qualquer senha liga o modo humano do ai-memory 3.x, e nesse modo o `serve` só parte se
+houver um `root` com senha e ativo. A checagem acontece só na partida: sem o root, o servidor que
+já está de pé segue funcionando e o defeito aparece no primeiro reboot, com o container em loop:
+
+```
+Error: human authentication is enabled but no recoverable root user exists
+```
+
+O modo humano também recusa partir em endereço não-loopback com HTTP puro, e dentro do container o
+servidor escuta em `0.0.0.0`. O `AI_MEMORY_AUTH__SECURE_COOKIE: "true"` do `compose.yml` atende essa
+exigência: marca o cookie de sessão como `Secure`. Não afeta hooks nem MCP, que usam bearer. O login
+web por `http://127.0.0.1` não foi testado com essa configuração.
+
+As duas variáveis de senha ficam no `compose.yml` como referência ao ambiente do terminal. No boot
+normal chegam vazias e o servidor as ignora.
+
+### Recuperar uma instalação em loop
+
+Para quem instalou pela versão anterior deste README, sem o passo do root. A memória em `data/` não
+é perdida.
+
+```bash
+cd ai-memory
+export AI_MEMORY_AUTH__RECOVERY_TOKEN="$(openssl rand -hex 32)"
+docker compose up -d --force-recreate
+
+read -rs -p "nova senha root (12+ caracteres): " P; echo
+curl -sS -o /dev/null -w '%{http_code}\n' -X POST http://127.0.0.1:49374/auth/recovery \
+  -H 'content-type: application/json' \
+  -d '{"recovery_token":"'"$AI_MEMORY_AUTH__RECOVERY_TOKEN"'","new_password":"'"$P"'","new_password_confirmation":"'"$P"'"}'
+unset P AI_MEMORY_AUTH__RECOVERY_TOKEN
+docker compose up -d --force-recreate
+```
+
+O `curl` precisa responder `204`. O token de recuperação só existe nesse terminal: com ele, o
+servidor aceita partir sem root e o `POST /auth/recovery` cria o root com a senha nova. O último
+`up` recria o container sem o token.
+
+O que os hooks não conseguiram entregar durante o loop fica em `~/.local/share/ai-memory/hook-spool/`
+do lado de quem rodou o hook, e é reenviado sozinho na próxima entrega bem-sucedida. O spool de um
+devcontainer fica dentro dele e se perde no `dcr`.
 
 ## Filtro de segredos
 
