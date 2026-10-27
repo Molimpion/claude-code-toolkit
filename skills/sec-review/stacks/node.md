@@ -6,7 +6,7 @@ Escopo desta skill: **Express, NestJS e Fastify**. Outro framework → aplicar o
 fallback do §1 e marcar A01 como cobertura parcial no relatório.
 
 Estrutura: **§1 detecção**, **§2 invariantes**, **§3 por framework**,
-**§4 TypeScript**.
+**§4 TypeScript**, **§5 scripts de instalação**.
 
 ---
 
@@ -169,6 +169,38 @@ grep -rn "req\.body as\|request\.body as\|body as " src/
 grep -rn "\.\.\.req\.body\|\.\.\.request\.body" src/
 grep -rn '"strict"' tsconfig.json
 ```
+
+---
+
+## §5 Scripts de instalação (A08 — supply chain)
+
+`npm install` executa `preinstall`, `install`, `postinstall` e `prepare` do
+projeto e de cada dependência, com as permissões de quem instala. Pacote
+malicioso novo não tem CVE: o `npm audit` não o vê.
+
+**Projeto:** ler sempre os scripts de ciclo de vida do `package.json` e o
+arquivo que eles chamam.
+
+**Dependências:** listar as que têm script de instalação. Vai no relatório como
+INFO — compilar código nativo ou baixar binário da plataforma é uso legítimo
+(`esbuild`, `bcrypt`, `sharp`).
+
+Nos dois casos, vira achado só com sinal concreto:
+
+| Sinal | Severidade |
+|---|---|
+| Script lê credencial (`~/.ssh`, `~/.npmrc`, `.env`, variável de ambiente) e a envia para a rede | CRITICAL |
+| Nome que imita pacote conhecido (letra trocada ou duplicada, escopo falso) | HIGH |
+| Script baixa e executa algo de fora do registry | HIGH |
+
+```bash
+grep -nE '"(preinstall|install|postinstall|prepare)"' package.json
+grep -nE '"node_modules/[^"]+": \{|"hasInstallScript": true' package-lock.json \
+  | grep -B1 '"hasInstallScript"' | grep -o '"node_modules/[^"]*"'
+```
+
+Sem `package-lock.json`, a lista de dependências não sai: registrar como não
+verificado (princípio 6).
 
 ---
 
