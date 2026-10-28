@@ -22,6 +22,7 @@ As skills são agnósticas de stack: detectam a linguagem em runtime e leem o co
 | `sec-review` | orquestradora | Auditoria de segurança ancorada no OWASP Top 10, com filtro de falso positivo; propõe correção, nunca aplica | autoral |
 | `change-summary` | orquestradora | Descrição de PR, mensagem de commit ou changelog seguindo a convenção do projeto | autoral |
 | `task-log` | orquestradora | Registro de aprendizado pós-task: o que mudou, decisões, alternativas descartadas e ordem de leitura do código | autoral |
+| `post-refactor` | orquestradora | Varredura do que vários commits ou PRs deixaram para trás: regressão, erro engolido, duplicação, teste fraco ou instável | autoral, ideia de akitaonrails/my-skills |
 | `codebase-design` | primitivo | Vocabulário de design de módulos (depth, seam, adapter, leverage, locality) | adaptada de mattpocock/skills |
 | `grilling` | primitivo | Interroga um plano em rodadas até esvaziar a árvore de decisão | adaptada de mattpocock/skills |
 

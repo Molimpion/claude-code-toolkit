@@ -140,6 +140,7 @@ Instaladas em `~/.claude/skills/`:
 | `sec-review` | Auditoria de segurança do repositório, ancorada no OWASP Top 10, com filtro anti-falso-positivo. Propõe correção, nunca aplica. | manual (`/sec-review`) |
 | `change-summary` | Descrição de PR, mensagem de commit ou entrada de changelog, seguindo a convenção que o projeto já usa. | manual (`/change-summary`) |
 | `task-log` | Registro de aprendizado pós-task em `docs/tasks/log/`: o que mudou, decisões, alternativas descartadas e ordem de leitura do código. | manual (`/task-log`) |
+| `post-refactor` | Varredura do que vários commits ou PRs deixaram para trás: regressão, erro engolido, duplicação, teste fraco ou instável. Só relata. | manual (`/post-refactor`) |
 | `codebase-design` | Vocabulário de design de módulos (module, interface, depth, seam, adapter, leverage, locality). Consultada pelas outras. | automática |
 | `grilling` | Interroga um plano em rodadas até esvaziar a árvore de decisão. | automática |
 
