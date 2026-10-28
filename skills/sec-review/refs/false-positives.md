@@ -35,7 +35,9 @@ BAIXA e a nota "requer revisão humana".
 | Dependência antiga **sem** advisory | INFO no máximo |
 | DevDependency com alerta, sem uso em runtime | Verificar a árvore de import antes |
 | Ausência de header de segurança (CSP, HSTS, X-Frame-Options) | INFO; pode estar no proxy reverso, CDN ou ingress, invisível no repositório |
-| Ausência de rate limit numa rota qualquer | Só é achado em rota sensível: login, recuperação de senha, pagamento, envio |
+| Ausência de rate limit numa rota qualquer | Só é achado em rota sensível: login, recuperação de senha, pagamento, envio, operação cara (relatório, export) |
+| Body parser com o limite padrão do framework | O Express limita JSON a 100 kb e o Fastify a 1 MB; só é achado (D1) se o limite foi elevado ou desligado |
+| Consulta, `if` e gravação sobre recurso disputado, com constraint única ou lock cobrindo a gravação | A constraint ou o lock fecham a corrida (D2); conferir a migration antes de reportar |
 | Log de objeto de erro em catch | LOW; só sobe se logar senha, token ou sessão inteira |
 | CORS permissivo em rota **sem** credencial e sem dado privado | Verificar se há cookie ou token antes |
 | Upload sem validação de extensão, mas com validação de MIME e tamanho | Rebaixar; extensão sozinha não é a defesa principal |

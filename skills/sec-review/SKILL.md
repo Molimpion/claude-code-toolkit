@@ -63,6 +63,15 @@ ls turbo.json nx.json pnpm-workspace.yaml go.work 2>/dev/null
 | ambos (monorepo) | perguntar qual módulo auditar antes de continuar |
 | nenhum | avisar que a stack não é coberta e perguntar antes de prosseguir |
 
+Verificações condicionais, carregadas só quando o sinal aparece:
+
+| Sinal | Carregar |
+|---|---|
+| Coluna ou campo de organização em várias tabelas (`tenant_id`, `organizacao_id`, `empresa_id`, `orgao_id`), ou middleware que resolve a organização da requisição | `refs/multi-tenant.md` |
+| O repositório executa código de terceiro ou é executado por outro sistema: hooks, plugins, ferramentas MCP, extensões | `refs/extensions.md` |
+
+Sem sinal, registrar no cabeçalho do relatório que a verificação não se aplicou.
+
 Registrar as versões **instaladas** (lockfile) das dependências relevantes — vão
 no cabeçalho do relatório.
 
@@ -138,18 +147,20 @@ mostra essa cobertura — o usuário precisa saber o que **não** foi olhado.
 
 | # | Categoria | O que procurar |
 |---|---|---|
-| A01 | Controle de acesso quebrado | ID vindo do cliente usado em query sem checar dono (IDOR/BOLA); rota sem middleware/guard; papel checado só no front; path traversal em download |
+| A01 | Controle de acesso quebrado | ID vindo do cliente usado em query sem checar dono (IDOR/BOLA); rota sem middleware/guard; papel checado só no front; path traversal em download; redirect para URL vinda do usuário sem allowlist (open redirect) |
 | A02 | Falhas criptográficas | hash obsoleto (MD5, SHA1) para senha; segredo hardcoded; TLS desabilitado; token previsível (`Math.random`, `Random` sem seed seguro); PII sem criptografia em repouso quando o projeto declara precisar |
-| A03 | Injeção | SQL concatenado ou raw sem parâmetro; comando de SO com input do usuário; XSS refletido/armazenado; LDAP/NoSQL injection; template injection |
-| A04 | Design inseguro | fluxo de recuperação de senha sem expiração; ausência de rate limit em login; operação financeira sem idempotência |
-| A05 | Configuração incorreta | debug ligado em produção; CORS `*` com credenciais; stack trace vazando ao cliente; console de admin exposto; bucket/dir público sem intenção |
+| A03 | Injeção | SQL concatenado ou raw sem parâmetro; comando de SO com input do usuário; XSS refletido/armazenado; LDAP/NoSQL injection; template injection; módulo ou classe carregados por nome vindo do usuário (`require`/`import()` dinâmico, `Class.forName`); `vm` do Node usado como sandbox |
+| A04 | Design inseguro | fluxo de recuperação de senha sem expiração; ausência de rate limit em login |
+| A05 | Configuração incorreta | debug ligado em produção; CORS `*` com credenciais; stack trace vazando ao cliente; console de admin exposto; bucket/dir público sem intenção; programa de terceiro chamado como subprocesso herdando o ambiente inteiro (segredos em variável de ambiente); `trust proxy` ligado sem proxy na frente, ou aceitando qualquer `X-Forwarded-For` (o IP vira forjável e fura rate limit e allowlist); link absoluto (reset de senha, convite) montado a partir do header `Host` em vez da configuração; resposta com dado privado sem `Cache-Control: no-store` atrás de CDN ou proxy; porta de debug, admin ou métricas escutando em todas as interfaces |
 | A06 | Componentes desatualizados | resultado do Step 1 |
 | A07 | Falhas de autenticação e sessão | senha sem política mínima; sessão sem expiração; token sem verificação de assinatura; ausência de invalidação no logout; brute force sem trava |
-| A08 | Falhas de integridade | desserialização de dado não confiável; upload sem validação de tipo e tamanho; dependência de fonte não confiável; webhook sem verificação de assinatura |
-| A09 | Falhas de log e monitoramento | senha, token ou sessão inteira em log; evento de segurança sem registro; PII em log |
+| A08 | Falhas de integridade | desserialização de dado não confiável; upload sem validação de tipo e tamanho; dependência de fonte não confiável; webhook sem verificação de assinatura, ou com assinatura mas sem janela de tempo (replay) |
+| A09 | Falhas de log e monitoramento | senha, token ou sessão inteira em log; evento de segurança sem registro; PII em log; trilha de auditoria de operação sensível ausente, ou editável e apagável por quem executou a operação |
 | A10 | SSRF | requisição para URL controlada pelo usuário sem allowlist |
+| D1 | Disponibilidade (fora do OWASP) | limite de body elevado ou desligado; regex com quantificador aninhado aplicada a entrada do usuário (ReDoS); listagem sem paginação, ou com `limit` vindo do cliente sem máximo; chamada a serviço externo sem timeout; servidor sem timeout de requisição; operação cara (relatório, export, envio de e-mail) sem rate limit |
+| D2 | Corrida (fora do OWASP) | checar e depois gravar sem transação nem constraint única (TOCTOU): reserva de horário, saldo, estoque, cupom ou token de uso único; operação que o cliente pode repetir sem chave de idempotência |
 
-Detalhes específicos da stack no arquivo carregado no Step 0.
+D1 e D2 entram na cobertura como as categorias do OWASP. Detalhes específicos da stack e das verificações condicionais nos arquivos carregados no Step 0.
 
 ---
 
@@ -204,7 +215,7 @@ Ordem fixa:
 
 1. **Cabeçalho** — escopo, stack e versões instaladas, data, o que foi excluído
 2. **Resumo** — contagem por severidade
-3. **Cobertura OWASP** — tabela A01–A10 marcando coberto / não-aplicável / não-verificável
+3. **Cobertura** — tabela A01–A10, D1–D2 e verificações condicionais carregadas, marcando coberto / não-aplicável / não-verificável
 4. **Achados por categoria** — cada um com: severidade, confiança, arquivo e
    linha, trecho real, por que é explorável, correção acionável, referência
    OWASP/CWE
