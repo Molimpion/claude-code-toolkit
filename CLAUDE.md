@@ -96,6 +96,10 @@ Comunicação sempre em **português do Brasil**.
   response separados da entidade. É o que impede senha, hash ou campo interno
   vazarem numa serialização automática.
 - **Sem `any` em TypeScript.** Tipo difícil é sinal pra pensar, não pra escapar.
+- **Bug reportado: reproduza antes de corrigir.** Primeiro um teste que falha
+  pelo motivo relatado, depois a causa raiz explicada, só então a correção. Se
+  não reproduzir, pare e diga — não corrija por palpite. Exceção: o que não
+  muda comportamento (typo, texto de mensagem, label, estilo).
 - **Nome de teste descreve comportamento**, não implementação: "retorna 400 quando
   falta um canal obrigatório", não "testa o superRefine". Em projeto com
   convenção de nome já estabelecida, a convenção do projeto ganha — nomeie a
