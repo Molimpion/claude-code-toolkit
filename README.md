@@ -23,6 +23,7 @@ As skills são agnósticas de stack: detectam a linguagem em runtime e leem o co
 | `change-summary` | orquestradora | Descrição de PR, mensagem de commit ou changelog seguindo a convenção do projeto | autoral |
 | `task-log` | orquestradora | Registro de aprendizado pós-task: o que mudou, decisões, alternativas descartadas e ordem de leitura do código | autoral |
 | `post-refactor` | orquestradora | Varredura do que vários commits ou PRs deixaram para trás: regressão, erro engolido, duplicação, teste fraco ou instável | autoral, ideia de akitaonrails/my-skills |
+| `humanizer` | orquestradora | Reescreve texto com cara de IA (pt-BR e inglês) sem mudar o que ele diz | adaptada de blader/humanizer |
 | `codebase-design` | primitivo | Vocabulário de design de módulos (depth, seam, adapter, leverage, locality) | adaptada de mattpocock/skills |
 | `grilling` | primitivo | Interroga um plano em rodadas até esvaziar a árvore de decisão | adaptada de mattpocock/skills |
 
@@ -57,4 +58,4 @@ Mescle `settings.example.json` ao seu `~/.claude/settings.json` e adapte o `CLAU
 
 ## Créditos e licença
 
-`tdd`, `arch-review`, `codebase-design` e `grilling` são adaptações de [mattpocock/skills](https://github.com/mattpocock/skills), sob licença MIT (ver `THIRD_PARTY_LICENSES/`). A integração em `ai-memory/` usa o [ai-memory](https://github.com/akitaonrails/ai-memory), de [Fabio Akita](https://github.com/akitaonrails), também MIT; nenhum código dele é distribuído aqui, os scripts de hook são extraídos da imagem oficial na instalação. O restante é distribuído sob licença MIT (ver `LICENSE`).
+`tdd`, `arch-review`, `codebase-design` e `grilling` são adaptações de [mattpocock/skills](https://github.com/mattpocock/skills), sob licença MIT (ver `THIRD_PARTY_LICENSES/`). `humanizer` é adaptação de [blader/humanizer](https://github.com/blader/humanizer), de Siqi Chen, também MIT. `post-refactor` é autoral, a partir de uma ideia de [akitaonrails/my-skills](https://github.com/akitaonrails/my-skills); aquele repositório não tem licença, então nenhum texto dele é reproduzido aqui. A integração em `ai-memory/` usa o [ai-memory](https://github.com/akitaonrails/ai-memory), de [Fabio Akita](https://github.com/akitaonrails), também MIT; nenhum código dele é distribuído aqui, os scripts de hook são extraídos da imagem oficial na instalação. O restante é distribuído sob licença MIT (ver `LICENSE`).
