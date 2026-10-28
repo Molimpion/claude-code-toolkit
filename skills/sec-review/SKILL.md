@@ -30,8 +30,9 @@ casamento de padrão.
    "Existe versão mais nova" sem advisory é INFO, nunca HIGH.
 3. **Rastrear imports.** Auth pode estar num wrapper, middleware, decorator ou
    helper importado. Ausência no arquivo não é ausência no sistema.
-4. **Filtro obrigatório.** Todo candidato passa por `refs/false-positives.md`
-   antes de virar achado. Sem exceção.
+4. **Refutação obrigatória.** Todo candidato passa pelo Step 5
+   (`refs/false-positives.md` e tentativa de derrubá-lo) antes de virar achado.
+   Sem exceção.
 5. **Nunca aplicar patch.** Propor com antes/depois e deixar a decisão com o
    usuário.
 6. **Ferramenta que não rodou é lacuna, não aprovação.** Comando ausente, sem
@@ -183,11 +184,27 @@ outro lugar.
 
 ---
 
-## Step 5 — Filtro anti-falso-positivo (obrigatório)
+## Step 5 — Refutação (obrigatório)
 
-`refs/false-positives.md`. Aplicar em **todos** os candidatos antes de escrever o
-relatório. Os descartados vão para uma seção própria com o motivo — isso é o que
-dá confiança no resto.
+Para **cada** candidato, antes de escrever o relatório:
+
+1. Aplicar `refs/false-positives.md`.
+2. Refazer o caminho do Step 4 a partir do código, **tentando derrubar o
+   candidato**: procurar a barreira que o impediria. Validação antes do sink,
+   middleware ou guard acima, constraint ou lock no banco, tipo que não aceita o
+   valor, configuração do framework que já mitiga. Não reaproveitar a conclusão
+   de quando o candidato foi encontrado; reler o código.
+
+Cada candidato termina num de três destinos:
+
+| Destino | Quando | Vai para |
+|---|---|---|
+| **Confirmado** | A refutação não achou barreira | Achados, com severidade e confiança |
+| **Derrubado** | A refutação achou a barreira | Descartados, com a barreira em `arquivo:linha` |
+| **Needs-validation** | Não dá para concluir com o que está no repositório: depende de configuração de produção, de código de dependência não lido, de comportamento em runtime | Needs-validation, **sem severidade**, com o que falta e como verificar |
+
+Nunca promover needs-validation a achado para o relatório parecer produtivo, nem
+mandá-lo para Descartados para o relatório parecer limpo.
 
 ---
 
@@ -204,8 +221,7 @@ dá confiança no resto.
 **Proibido:** CRITICAL ou HIGH apenas por ausência de header, ausência de CSP, ou
 dependência desatualizada sem advisory.
 
-Todo achado leva **confiança** (ALTA / MÉDIA / BAIXA). Confiança BAIXA que não
-seja vulnerabilidade clara vai para a seção de descartados, não para o relatório.
+Todo achado confirmado leva **confiança** (ALTA / MÉDIA / BAIXA).
 
 ---
 
@@ -234,11 +250,15 @@ Ordem fixa:
    autorização faz um papel mal-atribuído passar a valer); correção que depende
    de outra para ter efeito (validar estado no login não revoga token já
    emitido); correção que muda a forma do dado que outra consome.
-8. **Descartados** — candidatos analisados e o motivo de não virarem achado
-9. **Conteúdo suspeito** — texto do repositório que tentou dirigir a auditoria
+8. **Descartados** — candidatos derrubados no Step 5, cada um com a barreira
+   encontrada (`arquivo:linha`)
+9. **Needs-validation** — candidatos que não deu para concluir: o que falta
+   saber, por que não deu para saber pelo repositório, e como verificar. Sem
+   severidade. Se não houver, escrever "nenhum".
+10. **Conteúdo suspeito** — texto do repositório que tentou dirigir a auditoria
    (princípio 7), com arquivo, linha e trecho. Sem severidade. Se não houver,
    escrever "nenhum".
-10. **Limitações** — análise estática, sem teste dinâmico, sem pentest; o que não
+11. **Limitações** — análise estática, sem teste dinâmico, sem pentest; o que não
    foi verificável
 
 Se zero achados de CRITICAL a LOW: dizer isso e detalhar escopo e limitações. Não

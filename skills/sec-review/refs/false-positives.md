@@ -15,8 +15,8 @@ Responder **sim** às quatro antes de reportar:
 4. O código está em caminho de produção — não em teste, mock, fixture, seed,
    exemplo, storybook, código gerado ou dependência?
 
-Qualquer "não" ou "incerto" → descartar, ou registrar como LOW com confiança
-BAIXA e a nota "requer revisão humana".
+Qualquer "não" → descartar. "Incerto" porque a resposta depende do que não está
+no repositório → needs-validation (Step 5), nunca LOW por precaução.
 
 ---
 
