@@ -142,6 +142,7 @@ Instaladas em `~/.claude/skills/`:
 | `task-log` | Registro de aprendizado pós-task em `docs/tasks/log/`: o que mudou, decisões, alternativas descartadas e ordem de leitura do código. | manual (`/task-log`) |
 | `post-refactor` | Varredura do que vários commits ou PRs deixaram para trás: regressão, erro engolido, duplicação, teste fraco ou instável. Só relata. | manual (`/post-refactor`) |
 | `humanizer` | Reescreve texto com cara de IA, em pt-BR ou inglês, sem mudar o que ele diz. | manual (`/humanizer`) |
+| `verification-planning` | Antes de implementar mudança não trivial, define as afirmações e a evidência que prova cada uma; depois, relata o que ficou provado. | manual (`/verification-planning`) |
 | `codebase-design` | Vocabulário de design de módulos (module, interface, depth, seam, adapter, leverage, locality). Consultada pelas outras. | automática |
 | `grilling` | Interroga um plano em rodadas até esvaziar a árvore de decisão. | automática |
 
