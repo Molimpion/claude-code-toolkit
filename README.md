@@ -26,6 +26,7 @@ As skills são agnósticas de stack: detectam a linguagem em runtime e leem o co
 | `humanizer` | orquestradora | Reescreve texto com cara de IA (pt-BR e inglês) sem mudar o que ele diz | adaptada de blader/humanizer |
 | `verification-planning` | orquestradora | Antes de implementar, define o que precisa virar verdade e que evidência prova cada afirmação; depois, relata o que ficou provado | autoral, ideia de akitaonrails/my-skills |
 | `reflect` | orquestradora | Procura nas sessões passadas (ai-memory e transcrições) atrito que se repete e propõe a menor mudança no toolkit; não aplica nada | autoral, ideia de akitaonrails/my-skills |
+| `pr-review` | orquestradora | Revisa PR contra um critério de pronto fechado (task, ADRs, lista de falhas, sabotagem, portão) e entrega rascunho com veredito; a segunda rodada só confere o que foi pedido | autoral |
 | `codebase-design` | primitivo | Vocabulário de design de módulos (depth, seam, adapter, leverage, locality) | adaptada de mattpocock/skills |
 | `grilling` | primitivo | Interroga um plano em rodadas até esvaziar a árvore de decisão | adaptada de mattpocock/skills |
 
