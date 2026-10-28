@@ -201,7 +201,7 @@ Cada candidato termina num destino:
 |---|---|---|
 | **Confirmado** | A refutação não achou barreira | Achados, com severidade e confiança |
 | **Derrubado** | A refutação achou a barreira no próprio caminho (o código está certo) | Descartados, com a barreira em `arquivo:linha` |
-| **Hardening** | O código está errado, mas outra camada comprovada no repositório barra o ataque: gateway, constraint no banco, configuração do framework | Achados, LOW (INFO se a camada for o próprio framework), com a camada que segura em `arquivo:linha` |
+| **Hardening** | O código está errado, mas outra camada comprovada no repositório barra o ataque: gateway, constraint no banco, configuração do framework | Achados, LOW (INFO se a camada for configuração global do framework), com a camada que segura em `arquivo:linha` |
 | **Needs-validation** | Não dá para concluir com o que está no repositório: depende de configuração de produção, de código de dependência não lido, de comportamento em runtime | Needs-validation, **sem severidade**, com o que falta e como verificar |
 
 Nunca promover needs-validation a achado para o relatório parecer produtivo, nem
@@ -223,7 +223,17 @@ mandá-lo para Descartados para o relatório parecer limpo.
 dependência desatualizada sem advisory.
 
 **Camadas.** Brecha que outra camada comprovadamente barra é hardening (Step 5),
-não vulnerabilidade. Rebaixar por uma barreira que não está no repositório
+não vulnerabilidade.
+
+O critério entre derrubado e hardening quando a camada é o framework: o código
+**segue o caminho padrão** do framework (template com escape automático, query
+parametrizada) → derrubado, porque não há erro. O código **é inseguro por si** e
+só uma configuração global o salva → hardening INFO. Exemplo: o controller
+espalha o body no `create` (mass assignment), mas um `ValidationPipe` global com
+`whitelist: true` remove os campos extras. Basta a rota sair do escopo do pipe,
+ou alguém desligar a opção, para a brecha abrir.
+
+Rebaixar por uma barreira que não está no repositório
 ("é interno", "o proxy deve bloquear") é proibido: sem prova, é needs-validation.
 
 Todo achado confirmado leva **confiança** (ALTA / MÉDIA / BAIXA).

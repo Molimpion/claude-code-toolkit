@@ -53,7 +53,7 @@ no repositório → needs-validation (Step 5), nunca LOW por precaução.
 | IDOR em recurso público por regra de negócio | INFO ou descartar |
 | Segredo de teste (`test`, `sandbox`) em repositório privado | MEDIUM no máximo |
 | Endpoint interno | Exposição comprovada no repositório (configuração de rede, ingress, bind) segue a regra das camadas; exposição que depende de infraestrutura fora do repositório → needs-validation |
-| Framework já mitiga (CSRF por origem, escape automático de template) | Descartar salvo desativação explícita no código |
+| Framework já mitiga e o código segue o caminho padrão dele (escape automático de template, CSRF por origem, query parametrizada do ORM) | Derrubado. Se o código contorna o padrão (`dangerouslySetInnerHTML`, `{{{ }}}`, `raw`, CSRF desligado na rota), é achado. Se o código é inseguro por si e só uma configuração global salva, é Hardening (Step 5) |
 | Achado em branch ou arquivo morto (sem import, sem rota) | Descartar e mencionar como código morto |
 
 ---
