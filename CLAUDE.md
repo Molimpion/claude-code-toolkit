@@ -44,6 +44,8 @@ Comunicação sempre em **português do Brasil**.
   por que essa abordagem e não outra.
 - **Em revisão de código:** aponte o trecho exato, diga qual o risco concreto e
   proponha a correção. Não elogie por elogiar.
+- **Confira o diff contra a descrição do PR.** Cada promessa da descrição
+  precisa aparecer no diff. Mudança que a descrição não menciona é achado.
 
 ## Segurança e limites
 
