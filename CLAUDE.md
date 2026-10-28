@@ -143,6 +143,7 @@ Instaladas em `~/.claude/skills/`:
 | `post-refactor` | Varredura do que vários commits ou PRs deixaram para trás: regressão, erro engolido, duplicação, teste fraco ou instável. Só relata. | manual (`/post-refactor`) |
 | `humanizer` | Reescreve texto com cara de IA, em pt-BR ou inglês, sem mudar o que ele diz. | manual (`/humanizer`) |
 | `verification-planning` | Antes de implementar mudança não trivial, define as afirmações e a evidência que prova cada uma; depois, relata o que ficou provado. | manual (`/verification-planning`) |
+| `reflect` | Procura nas sessões passadas correção ou pedido que se repete e propõe a menor mudança no toolkit (regra, skill, hook ou nada). Não aplica. | manual (`/reflect`) |
 | `codebase-design` | Vocabulário de design de módulos (module, interface, depth, seam, adapter, leverage, locality). Consultada pelas outras. | automática |
 | `grilling` | Interroga um plano em rodadas até esvaziar a árvore de decisão. | automática |
 
