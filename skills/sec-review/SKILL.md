@@ -233,11 +233,15 @@ Ordem fixa:
 2. **Resumo** — contagem por severidade
 3. **Cobertura** — tabela A01–A10, D1–D2 e verificações condicionais carregadas, marcando coberto / não-aplicável / não-verificável
 4. **Achados por categoria** — cada um com: severidade, confiança, arquivo e
-   linha, trecho real, por que é explorável, correção acionável, referência
-   OWASP/CWE
+   linha, trecho real, pré-requisitos do atacante (que acesso ou condição ele
+   precisa ter), por que é explorável, correção acionável, compatibilidade da
+   correção (uma frase: quebra cliente, invalida sessão, exige migration ou
+   limpeza de dado — ou "sem impacto"), referência OWASP/CWE
 5. **Dependências**
 6. **Segredos**
-7. **Correções propostas** (só CRITICAL e HIGH) — antes/depois, precedido de:
+7. **Correções propostas** (só CRITICAL e HIGH) — antes/depois e o teste de
+   regressão proposto em texto (entrada, resultado esperado, resultado de hoje),
+   precedido de:
    *"Revise cada correção antes de aplicar. Nada foi alterado no repositório."*
 
    **Ordem de aplicação (obrigatório).** Severidade responde "o que é mais
