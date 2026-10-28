@@ -9,7 +9,7 @@ description: >
   branch, use /security-review.
 disable-model-invocation: true
 argument-hint: [path opcional]
-allowed-tools: Bash(npm audit *) Bash(npm ls *) Bash(git ls-files *) Bash(git log *) Bash(git fetch *) Bash(git status *) Bash(git rev-list *) Bash(mvn dependency*) Bash(./gradlew dependenc*) Bash(grep *) Bash(find *)
+allowed-tools: Bash(npm audit *) Bash(npm ls *) Bash(git ls-files *) Bash(git log *) Bash(git fetch *) Bash(git status *) Bash(git rev-list *) Bash(mvn dependency*) Bash(./gradlew dependenc*) Bash(grep *) Bash(find *) Bash(gh repo view *)
 ---
 
 # Security Review
@@ -70,6 +70,7 @@ Verificações condicionais, carregadas só quando o sinal aparece:
 |---|---|
 | Coluna ou campo de organização em várias tabelas (`tenant_id`, `organizacao_id`, `empresa_id`, `orgao_id`), ou middleware que resolve a organização da requisição | `refs/multi-tenant.md` |
 | O repositório executa código de terceiro ou é executado por outro sistema: hooks, plugins, ferramentas MCP, extensões | `refs/extensions.md` |
+| Remoto no GitHub **e** sinal de alerta ativado: `.github/dependabot.yml`, workflow com `codeql`, ou o usuário pediu os alertas | `refs/github-alerts.md` |
 
 Sem sinal, registrar no cabeçalho do relatório que a verificação não se aplicou.
 
