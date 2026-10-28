@@ -52,7 +52,7 @@ no repositório → needs-validation (Step 5), nunca LOW por precaução.
 |---|---|
 | IDOR em recurso público por regra de negócio | INFO ou descartar |
 | Segredo de teste (`test`, `sandbox`) em repositório privado | MEDIUM no máximo |
-| Endpoint interno sem exposição externa comprovada | Rebaixar um nível e registrar a suposição |
+| Endpoint interno | Exposição comprovada no repositório (configuração de rede, ingress, bind) segue a regra das camadas; exposição que depende de infraestrutura fora do repositório → needs-validation |
 | Framework já mitiga (CSRF por origem, escape automático de template) | Descartar salvo desativação explícita no código |
 | Achado em branch ou arquivo morto (sem import, sem rota) | Descartar e mencionar como código morto |
 
