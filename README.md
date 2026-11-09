@@ -44,6 +44,16 @@ As skills são agnósticas de stack: detectam a linguagem em runtime e leem o co
 
 A pasta [`ai-memory/`](ai-memory/) roda o [ai-memory](https://github.com/akitaonrails/ai-memory) num container próprio e o liga aos devcontainers: hooks registram cada sessão, a seguinte recebe um resumo do que ficou em aberto e o agente pesquisa a memória por MCP. Os atalhos `dc`/`dcr`/`dcsh` de [`ai-memory/dc.sh`](ai-memory/dc.sh) ligam o container à rede do servidor e passam a chave, sem configuração por projeto. Um filtro garante que prompt barrado por conter segredo não seja gravado. Riscos e instalação no [README da pasta](ai-memory/README.md).
 
+## Status line
+
+[`statusline/statusline.py`](statusline/statusline.py) mostra no rodapé do Claude Code o modelo, o contexto consumido da conversa e o uso das janelas de 5 horas e 7 dias do plano:
+
+```
+Opus 5.5 · contexto 151k/1M (15%) · 5h 15% · 7d 54%
+```
+
+Lê o JSON que o Claude Code entrega na entrada padrão e omite o campo que não vier, então funciona também com API key, que não tem janela de uso. Só usa a biblioteca padrão do Python.
+
 ## Como usar
 
 ```bash
@@ -51,9 +61,10 @@ git clone https://github.com/Molimpion/claude-code-toolkit.git ~/.claude/toolkit
 mkdir -p ~/.claude/skills
 cd ~/.claude/skills
 for s in ../toolkit/skills/*/; do n=$(basename "$s"); ln -s "../toolkit/skills/$n" "$n"; done
+ln -s toolkit/statusline/statusline.py ~/.claude/statusline.py
 ```
 
-O clone fica dentro de `~/.claude` e os links são relativos para funcionarem também nos devcontainers, que montam só `~/.claude`: um link para fora dessa pasta aponta para um caminho que não existe dentro do container, e as skills somem sem aviso.
+O clone fica dentro de `~/.claude` e os links são relativos para funcionarem também nos devcontainers, que montam só `~/.claude`: um link para fora dessa pasta aponta para um caminho que não existe dentro do container, e as skills e a status line somem sem aviso.
 
 Cada skill vira um symlink próprio dentro de `~/.claude/skills/`, em vez de a pasta inteira apontar para o repo: o Claude Code grava ali as skills sincronizadas da conta (`synced/`), e elas não podem cair dentro do repositório. Se já existir em `~/.claude/skills/` uma skill com o mesmo nome, remova-a antes; caso contrário o link é criado dentro dela.
 
