@@ -33,6 +33,7 @@ As skills são agnósticas de stack: detectam a linguagem em runtime e leem o co
 ## Guardrails
 
 - **Permissões** (`settings.example.json`): qualquer comando git que altera histórico (commit, push, merge, rebase, reset, checkout, branch, stash) exige confirmação.
+- **Sem link de sessão em commit e PR** (`attribution.sessionUrl: false`): commit ou PR feito de uma sessão na nuvem ou de Remote Control não leva o link da sessão do claude.ai (o trailer `Claude-Session` no commit, o link na descrição do PR). O `Co-Authored-By` continua.
 - **Bloqueio de leitura de segredos:** regras `deny` impedem o agente de ler `.env`, variações e a pasta `secrets/`, mesmo que ele tente. A regra do `CLAUDE.md` pede; a permissão garante.
 - **Hook PreToolUse (`bloquear-env.mjs`):** cobre o que as regras `deny` de `Read` não alcançam. Recusa qualquer ferramenta que mire um `.env` (um `cat .env` no Bash, um `Grep` com glob `**/.env`, uma edição), deixando passar `.env.example`.
 - **Hook PostToolUse:** registra em log cada arquivo que o agente escreve ou edita.

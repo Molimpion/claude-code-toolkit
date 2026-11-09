@@ -3,6 +3,9 @@
     "type": "command",
     "command": "python3 ~/.claude/statusline.py"
   },
+  "attribution": {
+    "sessionUrl": false
+  },
   "permissions": {
     "ask": [
       "Bash(git commit:*)",
