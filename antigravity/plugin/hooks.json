@@ -1,0 +1,42 @@
+{
+  "toolkit": {
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "python3 ./adaptar.py pre-invocation",
+        "timeout": 15
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ./adaptar.py pre-tool-use",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ./adaptar.py post-tool-use",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "python3 ./adaptar.py stop",
+        "timeout": 15
+      }
+    ]
+  }
+}

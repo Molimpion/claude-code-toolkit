@@ -39,11 +39,30 @@ As skills são agnósticas de stack: detectam a linguagem em runtime e leem o co
 - **Hook PostToolUse:** registra em log cada arquivo que o agente escreve ou edita.
 - **Hook UserPromptSubmit:** bloqueia o envio de prompts que contenham tokens, chaves de API, chaves privadas ou URLs de banco com senha, antes que cheguem ao modelo.
 - **`CLAUDE.md` global:** regras de trabalho do agente. Entre elas: parar quando inventar uma regra de negócio, nunca pular ou apagar teste que falha, não alterar credenciais e não instalar dependência sem perguntar.
-- **Devcontainers com token de escopo mínimo** (guia em [`docs/devcontainer.md`](docs/devcontainer.md), procedimento do token em [`docs/runbook-gh-token.md`](docs/runbook-gh-token.md)): o agente roda isolado, com um token GitHub fine-grained limitado aos repositórios necessários.
+- **Devcontainers com token de escopo mínimo** (guia em [`docs/devcontainer.md`](docs/devcontainer.md), procedimento do token em [`docs/runbook-gh-token.md`](docs/runbook-gh-token.md)): o agente roda isolado, com um token GitHub fine-grained limitado aos repositórios necessários. O token fica num arquivo do host e o `dc` o entrega só ao container, sem rebaixar o login do `gh` no host.
 
 ## Memória entre sessões
 
 A pasta [`ai-memory/`](ai-memory/) roda o [ai-memory](https://github.com/akitaonrails/ai-memory) num container próprio e o liga aos devcontainers: hooks registram cada sessão, a seguinte recebe um resumo do que ficou em aberto e o agente pesquisa a memória por MCP. Os atalhos `dc`/`dcr`/`dcsh` de [`ai-memory/dc.sh`](ai-memory/dc.sh) ligam o container à rede do servidor e passam a chave, sem configuração por projeto. Um filtro garante que prompt barrado por conter segredo não seja gravado. Riscos e instalação no [README da pasta](ai-memory/README.md).
+
+## Antigravity CLI
+
+[`antigravity/plugin/`](antigravity/plugin/) leva os mesmos guardrails para o `agy`, como plugin. O `adaptar.py` traduz o payload do `agy` para o formato do Claude Code e chama os hooks de `hooks/`, então cada regra continua escrita num lugar só:
+
+- `PreInvocation`: filtro de segredo no prompt; prompt barrado encerra o turno antes do modelo.
+- `PreToolUse`: trava do arquivo de segredos; sem bloqueio, responde `ask`, que devolve a decisão às permissões do `agy` (sem `decision`, o `agy` nega a ferramenta).
+- `PostToolUse`: log de escrita, com a ferramenta marcada como `agy:`.
+- ai-memory nos quatro eventos, só quando o prompt passa no filtro de segredo. A resposta `allow` dos hooks dele é descartada.
+
+```bash
+~/.claude/toolkit/ai-memory/instalar-hooks.sh
+ln -s ../../../.claude/toolkit/antigravity/plugin ~/.gemini/config/plugins/toolkit-hooks
+agy plugin validate ~/.gemini/config/plugins/toolkit-hooks
+```
+
+O `instalar-hooks.sh` também extrai os hooks do ai-memory para o `agy`. O link é relativo pelo mesmo motivo das skills.
+
+No devcontainer, o atalho `dca` abre o `agy` no mesmo container do `dc`. Login, risco do token do Google e limitações em [`docs/antigravity.md`](docs/antigravity.md).
 
 ## Status line
 

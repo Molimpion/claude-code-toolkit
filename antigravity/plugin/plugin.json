@@ -1,0 +1,6 @@
+{
+  "name": "toolkit-hooks",
+  "displayName": "Hooks do toolkit",
+  "version": "1.0.0",
+  "description": "Trava do arquivo de segredos, filtro de segredo no prompt, log de escrita e ai-memory, adaptados do claude-code-toolkit."
+}

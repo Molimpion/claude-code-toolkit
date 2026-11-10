@@ -17,12 +17,20 @@ docker run --rm --user "$(id -u):$(id -g)" --network none -v "$work:/out" \
   --entrypoint /usr/local/bin/ai-memory "$image" \
   setup-agent --agent claude-code --to /out >"$work/snippet.txt" 2>/dev/null
 
+mkdir -p "$work/agy"
+docker run --rm --user "$(id -u):$(id -g)" --network none -v "$work/agy:/out" \
+  --entrypoint /usr/local/bin/ai-memory "$image" \
+  setup-agent --agent antigravity-cli --to /out >/dev/null 2>&1
+
 hooks_dir="$config_dir/ai-memory/hooks"
 rm -rf "$hooks_dir.novo"
-mkdir -p "$hooks_dir.novo/claude-code"
+mkdir -p "$hooks_dir.novo/claude-code" "$hooks_dir.novo/antigravity-cli"
 install -m 0644 "$work/_lib.sh" "$hooks_dir.novo/_lib.sh"
 for f in "$work"/claude-code/*.sh; do
   install -m 0755 "$f" "$hooks_dir.novo/claude-code/"
+done
+for f in "$work"/agy/antigravity-cli/*.sh; do
+  install -m 0755 "$f" "$hooks_dir.novo/antigravity-cli/"
 done
 rm -rf "$hooks_dir"
 mv "$hooks_dir.novo" "$hooks_dir"

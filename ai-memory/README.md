@@ -24,7 +24,7 @@ completa está no repositório dele.
 - Os hooks ficam em `~/.claude`, que os devcontainers já montam. O caminho usa
   `${CLAUDE_CONFIG_DIR:-$HOME/.claude}`, então funciona com qualquer usuário de container e no host.
 - `dc.sh` substitui os atalhos `dc`/`dcr`/`dcsh` do [guia de devcontainer](../docs/devcontainer.md):
-  a cada execução, liga o container à rede e passa a chave para a sessão. Projeto novo não precisa
+  a cada execução, liga o container à rede e passa a chave para a sessão, além do `GH_TOKEN` de `~/.config/gh-devcontainer/token` (ver o [runbook](../docs/runbook-gh-token.md)). Projeto novo não precisa
   de configuração extra.
 - Modo zero-LLM: nenhuma chave de API, nada sai da máquina.
 
@@ -193,8 +193,33 @@ Se a atualização falhou, volte também a versão anterior no `compose.yml` ant
 
 ## Onde funciona
 
-Funciona em qualquer projeto aberto com `dc`/`dcr`/`dcsh` que cumpra os pré-requisitos. Não funciona
-se o devcontainer usa `--network=host` ou `--network=none`, se o Claude for aberto por outro caminho
-(o servidor recusa os eventos sem chave) ou se dois projetos tiverem o mesmo nome. O ai-memory nomeia
+Funciona em qualquer projeto aberto com `dc`/`dcr`/`dca`/`dcsh` que cumpra os pré-requisitos. Não funciona
+se o devcontainer usa `--network=host` ou `--network=none`, se o agente for aberto por outro caminho
+sem a chave no ambiente (o servidor recusa os eventos sem chave) ou se dois projetos tiverem o mesmo nome. O ai-memory nomeia
 o projeto pelo remoto do git; sem remoto, pela pasta. Um `.ai-memory.toml` na raiz do repositório
 define o nome explicitamente.
+
+Na variante de vários repositórios (C3-C), o agente abre sempre no repo principal, então as sessões
+que mexem nos outros repos também caem no projeto dele.
+
+## No host, sem devcontainer
+
+Os hooks já apontam para `127.0.0.1:49374` por padrão; falta só a chave. Para o Claude Code (e o
+`agy`) abertos direto no host gravarem memória, o `~/.bashrc` exporta a chave que o `dc` passaria:
+
+```bash
+[ -r "$HOME/.config/ai-memory/chave" ] && export AI_MEMORY_AUTH_TOKEN="$(cat "$HOME/.config/ai-memory/chave")"
+```
+
+O agente lê a variável na partida: sessão aberta antes da linha existir segue sem memória até ser
+reaberta num terminal novo.
+
+O custo é o mesmo do primeiro item de [Riscos](#riscos), estendido ao host: qualquer processo do seu
+usuário lê a chave e lê e escreve a memória de todos os projetos.
+
+## Antigravity CLI
+
+O `instalar-hooks.sh` extrai também o pacote de hooks do `agy` para
+`~/.claude/ai-memory/hooks/antigravity-cli/`. Ele não é ligado direto no `agy`: quem chama esses
+scripts é o adaptador do plugin [`antigravity/plugin/`](../antigravity/plugin/), que aplica o filtro de
+segredo antes de repassar. Detalhes e limitações em [`docs/antigravity.md`](../docs/antigravity.md).
