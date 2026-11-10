@@ -48,8 +48,15 @@ configuração do host:
 ````yaml
     volumes:
       - ${HOME}/.gemini:/home/node/.gemini
+      - ${HOME}/.config/antigravity:/home/node/.config/antigravity
       - ${HOME}/.local/bin/agy:/usr/local/bin/agy:ro
 ````
+
+O `~/.config/antigravity` guarda as credenciais dos MCPs de plugin (Figma, Linear, Trello,
+Supabase, Vercel e outros) em `plugin-secrets.json`, no host e no container: o log mostra
+`Using file-based secret storage at .../.config/antigravity/plugin-secrets.json`. Sem esse bind,
+nenhum MCP de plugin funciona no container, e o que for autorizado lá dentro some no `dcr`. É o
+mesmo trato do `~/.claude`, que leva as credenciais do Claude Code para o container.
 
 Os hooks do plugin precisam de `python3` e `node` no container; a imagem
 `typescript-node` tem os dois. Uso simultâneo com o `dc`, `dca -c` e o `dcr`: Etapa B6
@@ -68,15 +75,26 @@ devcontainers.
 **Risco:** esse token tem escopo `cloud-platform`, que dá acesso amplo ao Google Cloud da
 conta, e fica legível por qualquer processo de qualquer devcontainer que monte o
 `~/.gemini`, inclusive os scripts do `npm ci`, e não só nas sessões abertas pelo `dca`. Ao
-contrário do `GH_TOKEN`, não dá para restringir o alcance. A regra de não rodar `dc` em
-repositório de terceiro vale em dobro aqui.
+contrário do `GH_TOKEN`, não dá para restringir o alcance. O mesmo vale para o
+`plugin-secrets.json`: os tokens OAuth de todos os MCPs de plugin ficam ao alcance de qualquer
+processo do container, e os de Supabase e Vercel rodam SQL em banco remoto e mexem em deploy. A
+regra de não rodar `dc` em repositório de terceiro vale em dobro aqui.
 
 ## Limitações
 
-- **MCP do ai-memory não funciona no `agy` de dentro do container.** O
-  `mcp_config.json` aponta para `http://127.0.0.1:49374`, e no container o servidor é
-  `http://ai-memory:49374`. Os hooks funcionam, porque usam `AI_MEMORY_HOOK_URL`, que o
-  `dc.sh` passa; o que falta é a pesquisa por MCP.
+- O `mcp_config.json` é o mesmo no host e no container, e o endereço do ai-memory muda
+  entre os dois: `127.0.0.1:49374` no host, `ai-memory:49374` na rede Docker. A saída é
+  usar o nome nos dois lados:
+
+  ````bash
+  echo '127.0.0.1 ai-memory' | sudo tee -a /etc/hosts
+  ````
+
+  e `"serverUrl": "http://ai-memory:49374/mcp"` na entrada `ai-memory` do
+  `~/.gemini/config/mcp_config.json`. O servidor aceita o nome porque `ai-memory` está no
+  `AI_MEMORY_ALLOWED_HOSTS` do `compose.yml`. Sem isso, a pesquisa por MCP falha no
+  container; os hooks funcionam de qualquer jeito, porque usam o `AI_MEMORY_HOOK_URL` que o
+  `dc.sh` passa.
 - O `mcp_config.json` guarda a chave do ai-memory escrita no arquivo (`0600`), não por
   variável de ambiente.
 - O `agy` dentro do container não se atualiza sozinho: o binário é montado só leitura.
