@@ -1,10 +1,19 @@
 AI_MEMORY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 AI_MEMORY_KEY_FILE="$HOME/.config/ai-memory/chave"
 AI_MEMORY_URL_IN_CONTAINER="http://ai-memory:49374"
+GH_TOKEN_FILE="$HOME/.config/gh-devcontainer/token"
+
+_dc_devcontainer() {
+  if [ -r "$GH_TOKEN_FILE" ]; then
+    GH_TOKEN="$(cat "$GH_TOKEN_FILE")" devcontainer "$@"
+  else
+    devcontainer "$@"
+  fi
+}
 
 _dc_up() {
   local out id
-  out=$(devcontainer up --workspace-folder . "$@") || return 1
+  out=$(_dc_devcontainer up --workspace-folder . "$@") || { printf '%s\n' "$out" >&2; return 1; }
   id=$(printf '%s\n' "$out" | tail -n 1 | python3 -c 'import json, sys; print(json.load(sys.stdin)["containerId"])') || return 1
 
   if ! docker network inspect ai-memory >/dev/null 2>&1; then
@@ -26,13 +35,17 @@ _dc_env() {
 }
 
 dc() {
-  _dc_up && _dc_env && devcontainer exec --workspace-folder . "${_DC_ENV[@]}" claude "$@"
+  _dc_up && _dc_env && _dc_devcontainer exec --workspace-folder . "${_DC_ENV[@]}" claude "$@"
 }
 
 dcr() {
-  _dc_up --remove-existing-container && _dc_env && devcontainer exec --workspace-folder . "${_DC_ENV[@]}" claude "$@"
+  _dc_up --remove-existing-container && _dc_env && _dc_devcontainer exec --workspace-folder . "${_DC_ENV[@]}" claude "$@"
+}
+
+dca() {
+  _dc_up && _dc_env && _dc_devcontainer exec --workspace-folder . "${_DC_ENV[@]}" agy "$@"
 }
 
 dcsh() {
-  _dc_up && _dc_env && devcontainer exec --workspace-folder . "${_DC_ENV[@]}" bash
+  _dc_up && _dc_env && _dc_devcontainer exec --workspace-folder . "${_DC_ENV[@]}" bash
 }

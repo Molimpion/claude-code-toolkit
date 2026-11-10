@@ -8,26 +8,31 @@ Criado em 2026-09-09.
 ## O desenho
 
 O bind de `~/.config/gh` foi removido dos devcontainers. No lugar, um
-**fine-grained token** vive no `~/.bashrc` do host e é repassado ao container
-por `remoteEnv`.
+**fine-grained token** vive em `~/.config/gh-devcontainer/token` no host
+(permissão `0600`), e os atalhos `dc`, `dcr` e `dcsh` de `ai-memory/dc.sh` o
+passam como `GH_TOKEN` só aos comandos `devcontainer`, que o repassam ao
+container por `remoteEnv`.
 
 Motivo: o bind dava a qualquer processo do container — inclusive scripts de
 instalação de pacote npm — acesso a um token com poder sobre todos os
 repositórios da conta. O fine-grained token alcança só os repositórios
 escolhidos, com quatro permissões, e expira em 90 dias.
 
-A linha no `~/.bashrc` do host tem esta forma (valor real nunca é copiado
-para lugar nenhum):
+Por que arquivo e não `export GH_TOKEN` no `~/.bashrc`: no host, `GH_TOKEN` tem
+prioridade sobre o login do `gh`. Exportado no shell, ele limitaria o `gh` e o
+`git push` do host aos repositórios do token, e o host pararia junto quando o
+token expirasse. Pelo arquivo, o host fica com o próprio login.
 
-```bash
-export GH_TOKEN=github_pat_...
-```
+O arquivo é gravado por `bin/gravar-gh-token.sh`; o valor real nunca é copiado
+para lugar nenhum além dele.
 
 ---
 
 ## `dc` e `dcr`
 
-Funções do `~/.bashrc` do host (`dcr` = `dc` com `--remove-existing-container`).
+Funções do `ai-memory/dc.sh`, carregado pelo `~/.bashrc` do host (`dcr` = `dc` com
+`--remove-existing-container`). O `dca`, que abre o `agy`, e o `dcsh` sobem o container pelo
+mesmo caminho e passam o mesmo `GH_TOKEN`.
 
 **Tudo que o `postCreateCommand` escreve só é restaurado pelo `dcr`** — o
 credential helper do `gh`, as permissões, qualquer coisa fora do bind mount.
@@ -44,7 +49,7 @@ nas três primeiras.
 
 ```bash
 # no HOST (esperado: 93)
-echo ${#GH_TOKEN}
+tr -d '\n' < ~/.config/gh-devcontainer/token | wc -c
 
 # DENTRO do container
 echo ${#GH_TOKEN}                      # esperado: 93 — a variável CHEGOU
@@ -112,23 +117,17 @@ não parece de credencial.
 #    Contents: RW | Pull requests: RW | Workflows: RW | Metadata: R
 #    (todo o resto: No access)
 
-# 2. EDITAR a linha existente no ~/.bashrc (não acrescentar outra)
-nano ~/.bashrc
+# 2. gravar por cima do arquivo (o script confere o token antes de gravar)
+~/.claude/toolkit/bin/gravar-gh-token.sh
 
-# 3. recarregar e conferir
-source ~/.bashrc
-echo ${#GH_TOKEN}
-
-# 4. reabrir o container
+# 3. reabrir o container
 dc          # se o gh continuar falhando: dcr
 ```
 
-### Máquina nova, ou `~/.bashrc` sem a linha
+### Máquina nova, ou sem `~/.config/gh-devcontainer/token`
 
-Não há o que editar: acrescente a linha do início deste runbook ao
-`~/.bashrc` do host, com um token gerado pelo passo 1 acima. Depois
-`source ~/.bashrc`, confirme com `echo ${#GH_TOKEN}` **no host**, e só então
-suba o container daquele mesmo terminal.
+Gere o token pelo passo 1 acima, rode `~/.claude/toolkit/bin/gravar-gh-token.sh`
+e confira que `~/.bashrc` carrega `ai-memory/dc.sh` (é ele que lê o arquivo).
 
 ---
 
@@ -158,9 +157,9 @@ continua dando 93 com token vencido) e checar a validade em
 github.com/settings/personal-access-tokens.
 
 **`echo ${#GH_TOKEN}` dá 0 dentro do container.**
-O `${localEnv:GH_TOKEN}` lê a variável do terminal que chamou o devcontainer.
-Se aquele terminal não tinha a variável, chega vazia. Abrir terminal novo,
-confirmar `echo ${#GH_TOKEN}` no host, e subir de novo dali.
+O container subiu sem o `dc` (um `devcontainer up` direto não lê o arquivo), ou
+`~/.config/gh-devcontainer/token` não existe. Rodar `gravar-gh-token.sh` se
+faltar o arquivo, e subir com `dcr`.
 
 **Push recusado ao alterar `.github/workflows/`.**
 Falta a permissão *Workflows: Read and write* no token.
