@@ -35,7 +35,7 @@ do projeto.
 | feature `claude-code` | instala o Claude Code no container | baixada no build |
 | feature `github-cli` | instala o `gh` | baixada no build |
 | bind de `~/.claude` | login + `CLAUDE.md` de usuário + config de MCP | pasta real na tua máquina |
-| `GH_TOKEN` via `remoteEnv` | autentica `gh` e `git push` | `~/.bashrc` do host → container |
+| `GH_TOKEN` via `remoteEnv` | autentica `gh` e `git push` | `~/.config/gh-devcontainer/token` → `dc` → container |
 | volumes nomeados | cache de dependências entre execuções | no Docker |
 | funções `dc`, `dcr`, `dcsh` | atalhos para subir + abrir | no `~/.bashrc` do host |
 
@@ -56,7 +56,13 @@ sudo usermod -aG docker $USER
 ````
 
 Depois faça **logout e login**. Abrir outro terminal não basta, porque o grupo só
-é reavaliado no login.
+é reavaliado no login. No Linux Mint, nem o logout sempre basta: processos da
+sessão gráfica sobrevivem e o terminal novo herda os grupos antigos. Confira com
+`id -nG`; se `docker` não aparece, **reinicie a máquina**. Para destravar um
+terminal só, sem reiniciar, `newgrp docker` abre um shell com o grupo ativo.
+
+O sintoma no `dc`, quando falta o grupo, é o `devcontainer up` falhar em
+`Command failed: docker ps -q -a --filter label=devcontainer.local_folder=...`.
 
 Se disser que não conecta ao daemon:
 
@@ -103,22 +109,28 @@ identidade é gravada por repositório; ver Etapa C8.
 
 ---
 
-## Etapa B5 — `GH_TOKEN` no host
+## Etapa B5 — Token do GitHub para os containers
 
-Acrescente ao `~/.bashrc` do host a linha com o fine-grained token:
-
-````bash
-export GH_TOKEN=github_pat_...
-````
+Grave o fine-grained token num arquivo do host:
 
 ````bash
-source ~/.bashrc
-echo ${#GH_TOKEN}      # esperado: 93
+~/.claude/toolkit/bin/gravar-gh-token.sh
 ````
+
+O script pede o token sem mostrá-lo, confere com o GitHub, mostra o login, a
+expiração e os repositórios privados que ele alcança, e grava em
+`~/.config/gh-devcontainer/token` com permissão `0600`. O `dc`, o `dcr` e o
+`dcsh` leem esse arquivo e passam `GH_TOKEN` só aos comandos `devcontainer`.
+
+**Por que não `export GH_TOKEN` no `~/.bashrc`:** no host, `GH_TOKEN` tem
+prioridade sobre o login do `gh`. Exportado no shell, ele rebaixa o `gh` e o
+`git push` do host ao alcance do token, e o host para de funcionar quando o token
+expira. Pelo arquivo, o host segue com o próprio login e só o container recebe o
+token restrito.
 
 Como gerar o token, quais permissões ele leva e como renovar: **runbook, seção
 C**. O valor real nunca é copiado para arquivo do projeto, `devcontainer.json`,
-`CLAUDE.md` nem para nenhum outro lugar além dessa linha.
+`CLAUDE.md` nem para nenhum outro lugar além desse arquivo.
 
 **Por que não o bind de `~/.config/gh`:** o bind entregava a qualquer processo do
 container, inclusive scripts de instalação de pacotes npm, um token com poder
@@ -157,9 +169,22 @@ dcsh() {
 | `dc` | sobe (ou reaproveita) e abre o Claude | dia a dia |
 | `dcr` | **recria** o container e abre o Claude | mudou o `devcontainer.json`, ou algo do `postCreateCommand` sumiu |
 | `dcsh` | sobe (ou reaproveita) e abre um shell | validar, diagnosticar, `gh auth status` |
+| `dca` | sobe (ou reaproveita) e abre o Antigravity CLI (`agy`) | só no `dc.sh`; ver [`antigravity.md`](antigravity.md) |
 
-> Usando a memória entre sessões de [`ai-memory/`](../ai-memory/README.md), troque estas funções
-> por `source <caminho>/ai-memory/dc.sh`: mesmos nomes e mesmo uso, mais a ligação com o servidor.
+Os argumentos passam direto para o agente: `dc --resume` e `dc -c` retomam o
+Claude; `dca -c` retoma a última conversa do `agy` e `dca --conversation <id>`,
+uma específica.
+
+**`dc` e `dca` ao mesmo tempo funcionam:** o `up` reaproveita o container de pé e
+cada um abre o próprio processo nele. Os dois agentes dividem arquivos, banco e
+Redis, então combine quem mexe em quê. **O `dcr` derruba qualquer sessão aberta
+naquele container**, do Claude ou do `agy`: feche a outra antes. Não há `dcr` para
+o `agy`; para recriar e abrir o `agy`, rode `dcr`, saia do Claude e chame `dca`.
+
+> Estas funções não passam o token da Etapa B5. Use no lugar `source ~/.claude/toolkit/ai-memory/dc.sh`:
+> mesmos nomes e mesmo uso, mais o `GH_TOKEN` lido de `~/.config/gh-devcontainer/token` e a ligação
+> com o servidor da [memória entre sessões](../ai-memory/README.md). Com o servidor desligado, ele
+> avisa e segue sem memória.
 
 **A regra que explica metade dos problemas:** o `postCreateCommand` só roda quando
 o container é **criado**. O `dc` reaproveita o container existente, então não
@@ -178,9 +203,10 @@ devcontainer up --workspace-folder . --remove-existing-container
 **Rode sempre da raiz do repo que tem o `.devcontainer/`.** As funções usam o
 diretório atual. Na variante multi-repo (C3-C), é o repo principal.
 
-**Rode sempre de um terminal onde o `GH_TOKEN` existe.** O `${localEnv:GH_TOKEN}`
-lê a variável do terminal que chamou o `devcontainer`. Se ela não estava lá,
-chega vazia ao container.
+**Suba sempre pelo `dc`, `dcr` ou `dcsh`.** O `${localEnv:GH_TOKEN}` lê a
+variável do processo que chamou o `devcontainer`, e são esses atalhos que a
+preenchem a partir de `~/.config/gh-devcontainer/token`. Um `devcontainer up`
+direto, sem o atalho, sobe o container sem token.
 
 ---
 
@@ -660,6 +686,10 @@ echo -e ".devcontainer/\n.claude/\nCLAUDE.md" >> .git/info/exclude
 O `.devcontainer/` aponta para um caminho da tua máquina, então não serve para o
 time. Lembre que o exclude não sobrevive a clone novo.
 
+Se o time versiona o `CLAUDE.md` (ou o `AGENTS.md`), deixe-o fora da lista: o
+exclude não tem efeito em arquivo rastreado e só confunde quem lê. Nesse caso,
+`echo -e ".devcontainer/\n.claude/" >> .git/info/exclude`.
+
 ### Consequências do padrão
 
 **O repo principal aparece em dois caminhos:** `/workspaces/<repo-principal>` e
@@ -692,6 +722,58 @@ for r in <repo-principal> <repo-b> <repo-c>; do
   git -C /workspaces/<pasta-mae>/$r ls-remote origin HEAD >/dev/null && echo "$r: ok" || echo "$r: FALHOU"
 done
 ````
+
+O `.git/config` está no bind, então a identidade também pode ser gravada pelo
+host, com o mesmo `git -C <repo> config --local`.
+
+### Variante: repo principal com compose do time (C3-C + C3)
+
+Quando o repo principal já tem `docker-compose.yml` com banco, o devcontainer vira
+serviço desse compose (Etapa C3) e a pasta-mãe entra como mais um volume. Os binds
+ficam no `volumes:` do serviço, com `${HOME}` (o Compose interpola do ambiente do
+host), em vez do `mounts` do `devcontainer.json`.
+
+`.devcontainer/docker-compose.dev.yml`:
+
+````yaml
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/typescript-node:22
+    command: sleep infinity
+    volumes:
+      - .:/workspaces/<repo-principal>
+      - ..:/workspaces/<pasta-mae>
+      - ${HOME}/.claude:/home/node/.claude
+    environment:
+      DATABASE_URL: postgresql://<usuario>:<senha-do-compose>@<servico-do-banco>:5432/<banco>
+    depends_on:
+      <servico-do-banco>:
+        condition: service_healthy
+````
+
+- Os caminhos relativos partem da raiz do repo principal, porque o primeiro
+  arquivo da lista é o `../docker-compose.yml` (regra do caminho da C3): `.` é o
+  repo, `..` é a pasta-mãe.
+- O `DATABASE_URL` usa o nome do serviço, não `localhost`, e os mesmos valores de
+  desenvolvimento que o compose do time já declara.
+- O `devcontainer.json` é o da C3 com `"service": "app"` e
+  `"workspaceFolder": "/workspaces/<repo-principal>"`, mais o `npm ci` no
+  `postCreateCommand` (Etapa C7).
+
+**Serviço do time com `env_file` obrigatório quebra o `up` num clone novo.** A
+CLI roda `docker compose ... --profile * config`, que avalia até os serviços de
+perfil que o devcontainer não sobe, e falha em `env file .../.env not found`.
+Não crie o arquivo de segredos para destravar: zere o `env_file` desses serviços
+no override, que é só teu (Compose 2.24 ou mais novo):
+
+````yaml
+services:
+  api:
+    env_file: !reset []
+````
+
+O Antigravity no mesmo container (binário, `~/.gemini`, `dca`) está em
+[`antigravity.md`](antigravity.md).
 
 ---
 
@@ -862,8 +944,8 @@ serve para você também e é reinstalado no build pela feature.
 
 ### Como a autenticação funciona
 
-1. O fine-grained token vive no `~/.bashrc` do host (Etapa B5).
-2. O `remoteEnv` repassa o `GH_TOKEN` ao container.
+1. O fine-grained token vive em `~/.config/gh-devcontainer/token` no host (Etapa B5).
+2. O `dc` lê o arquivo e passa `GH_TOKEN` ao `devcontainer`; o `remoteEnv` o repassa ao container.
 3. O `gh` lê o `GH_TOKEN` direto do ambiente; não precisa de `gh auth login`.
 4. O `gh auth setup-git`, no `postCreateCommand`, registra o `gh` como credential
    helper do git, para o `git push` por HTTPS usar o mesmo token.
@@ -1373,7 +1455,9 @@ Quando necessária, `node:1` vem antes de `claude-code:1`.
 | `git push` pede senha, helper configurado | remote em SSH | `git remote set-url origin https://...` |
 | `gh` age no repo errado (C3-C) | `gh` usa o repo do diretório atual | `cd <repo>` ou `gh -R dono/repo` |
 | Permissões aprovadas somem (C3-C) | caminhos absolutos de um mount antigo | reaprovar; limpar `.claude/settings.local.json` |
-| `echo ${#GH_TOKEN}` dá 0 no container | terminal do host sem a variável | terminal novo, conferir no host, subir de novo |
+| `dc` falha em `Command failed: docker ps -q -a --filter label=devcontainer...` | sessão sem o grupo `docker` | `id -nG`; reiniciar, ou `newgrp docker` no terminal |
+| `up` falha em `env file .../.env not found` | serviço de perfil do time com `env_file` | `env_file: !reset []` no override (C3-C + C3) |
+| `echo ${#GH_TOKEN}` dá 0 no container | subiu sem o `dc`, ou falta `~/.config/gh-devcontainer/token` | `gravar-gh-token.sh` e subir com `dcr` |
 | `gh` com erro de autenticação | token expirado | runbook, seção C |
 | Push recusado em `.github/workflows/` | falta *Workflows: RW* no token | editar permissões do token |
 | Push recusado em repo que funcionava | repo fora da lista do token | acrescentar no token |
