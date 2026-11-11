@@ -135,7 +135,12 @@ primeira correção da resposta.
    git diff <head-anterior> <head-atual> -- <arquivos desses commits>
    ```
 
-   Esse trecho novo passa pelo critério de pronto inteiro (Step 2).
+   O trecho novo que não é correção de item pedido passa pelo critério de
+   pronto inteiro (Step 2). O código que corrige um item pedido só gera
+   bloqueante em dois casos: a correção não resolve o item, ou há bug com
+   cenário concreto (critério 6). Condição nova sem item na lista, quando a
+   forma dela veio da proposta da própria revisão anterior, vira observação: a
+   revisão responde pela correção que propôs.
 3. **Linha que não mudou desde a rodada anterior não gera bloqueante novo**,
    salvo bug com cenário concreto (critério 6). O que a rodada anterior deixou
    passar ali vira observação. O critério só funciona se a rodada não reabre o
