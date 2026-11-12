@@ -66,13 +66,13 @@ No devcontainer, o atalho `dca` abre o `agy` no mesmo container do `dc`. Login, 
 
 ## Status line
 
-[`statusline/statusline.py`](statusline/statusline.py) mostra no rodapé do Claude Code o modelo, o contexto consumido da conversa e o uso das janelas de 5 horas e 7 dias do plano:
+[`statusline/statusline.py`](statusline/statusline.py) mostra no rodapé do Claude Code o modelo, a branch do git, o contexto consumido da conversa e o uso das janelas de 5 horas e 7 dias do plano:
 
 ```
-Opus 5.5 · contexto 151k/1M (15%) · 5h 15% · 7d 54%
+Opus 5.5 · main · contexto 151k/1M (15%) · 5h 15% · 7d 54%
 ```
 
-Lê o JSON que o Claude Code entrega na entrada padrão e omite o campo que não vier, então funciona também com API key, que não tem janela de uso. Só usa a biblioteca padrão do Python.
+Lê o JSON que o Claude Code entrega na entrada padrão e omite o campo que não vier, então funciona também com API key, que não tem janela de uso. Fora de um repositório git, ou com HEAD destacado, a branch some. Só usa a biblioteca padrão do Python.
 
 ## Como usar
 

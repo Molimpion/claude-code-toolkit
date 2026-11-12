@@ -1,4 +1,5 @@
 import json
+import subprocess
 import sys
 
 
@@ -10,8 +11,26 @@ def tokens(n):
     return str(n)
 
 
+def branch(pasta):
+    try:
+        saida = subprocess.run(
+            ["git", "-C", pasta, "branch", "--show-current"],
+            capture_output=True,
+            text=True,
+            timeout=1,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
+    return saida.stdout.strip()
+
+
 dados = json.load(sys.stdin)
 partes = [dados.get("model", {}).get("display_name", "?")]
+
+pasta = (dados.get("workspace") or {}).get("current_dir") or dados.get("cwd") or "."
+nome_branch = branch(pasta)
+if nome_branch:
+    partes.append(nome_branch)
 
 contexto = dados.get("context_window") or {}
 uso = contexto.get("current_usage") or {}
