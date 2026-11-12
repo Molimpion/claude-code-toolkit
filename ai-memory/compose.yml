@@ -2,7 +2,7 @@ name: ai-memory
 
 services:
   ai-memory:
-    image: akitaonrails/ai-memory:3.0.0
+    image: akitaonrails/ai-memory:3.3.2
     container_name: ai-memory
     restart: unless-stopped
     user: "1000:1000"
