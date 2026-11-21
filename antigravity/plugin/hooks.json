@@ -1,5 +1,12 @@
 {
   "toolkit": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "python3 ./adaptar.py session-start",
+        "timeout": 15
+      }
+    ],
     "PreInvocation": [
       {
         "type": "command",

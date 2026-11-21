@@ -49,6 +49,7 @@ A pasta [`ai-memory/`](ai-memory/) roda o [ai-memory](https://github.com/akitaon
 
 [`antigravity/plugin/`](antigravity/plugin/) leva os mesmos guardrails para o `agy`, como plugin. O `adaptar.py` traduz o payload do `agy` para o formato do Claude Code e chama os hooks de `hooks/`, então cada regra continua escrita num lugar só:
 
+- `SessionStart`: o Antigravity carrega só os primeiros 24.000 bytes de cada arquivo de regra; quando o `AGENTS.md` da raiz do workspace passa disso, o resto entra na conversa como mensagem de sistema.
 - `PreInvocation`: filtro de segredo no prompt; prompt barrado encerra o turno antes do modelo.
 - `PreToolUse`: trava do arquivo de segredos; sem bloqueio, responde `ask`, que devolve a decisão às permissões do `agy` (sem `decision`, o `agy` nega a ferramenta).
 - `PostToolUse`: log de escrita, com a ferramenta marcada como `agy:`.

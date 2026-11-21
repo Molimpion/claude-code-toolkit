@@ -16,6 +16,7 @@ FERRAMENTA_DO_CLAUDE = {
     "run_command": ("Bash", "command", "CommandLine"),
 }
 FERRAMENTAS_DE_ESCRITA = {"write_file", "edit_file"}
+LIMITE_DO_ARQUIVO_DE_REGRA = 24000
 
 
 def rodar(comando, entrada):
@@ -44,6 +45,36 @@ def chamada_no_formato_do_claude(payload):
         return {"tool_name": ferramenta, "tool_input": {campo: argumentos.get(origem, "")}}
     textos = " ".join(valor for valor in argumentos.values() if isinstance(valor, str))
     return {"tool_name": "Bash", "tool_input": {"command": textos}}
+
+
+def parte_cortada_da_regra(caminho):
+    with open(caminho, "rb") as arquivo:
+        linhas = arquivo.read().splitlines(keepends=True)
+    carregado = 0
+    for indice, linha in enumerate(linhas):
+        if carregado + len(linha) > LIMITE_DO_ARQUIVO_DE_REGRA:
+            return indice + 1, b"".join(linhas[indice:]).decode("utf-8")
+        carregado += len(linha)
+    return None
+
+
+def session_start(payload):
+    passos = []
+    for pasta in payload.get("workspacePaths") or []:
+        caminho = os.path.join(pasta, "AGENTS.md")
+        if not os.path.isfile(caminho):
+            continue
+        corte = parte_cortada_da_regra(caminho)
+        if corte is None:
+            continue
+        linha, resto = corte
+        texto = (
+            f"Continuação de {caminho}, a partir da linha {linha}. O Antigravity carrega só os "
+            f"primeiros {LIMITE_DO_ARQUIVO_DE_REGRA} bytes desse arquivo como regra; o trecho "
+            f"abaixo é o resto dele e vale do mesmo jeito.\n\n{resto}"
+        )
+        passos.append({"systemMessage": {"systemMessage": texto}})
+    return {"injectSteps": passos} if passos else {}
 
 
 def pre_invocation(payload):
@@ -81,6 +112,7 @@ def stop(payload):
 
 
 EVENTOS = {
+    "session-start": session_start,
     "pre-invocation": pre_invocation,
     "pre-tool-use": pre_tool_use,
     "post-tool-use": post_tool_use,
