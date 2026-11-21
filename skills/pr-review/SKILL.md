@@ -89,7 +89,7 @@ revisão não terminar.
 | 1 | **Task** | Cada critério do card tem correspondência no diff. Critério do card sem implementação, ou implementação que o card não pede, é achado |
 | 2 | **ADRs** | O código segue o que cada ADR do Step 0 decidiu. Citar o ADR e o trecho |
 | 3 | **Lista de falhas completa** | Listar toda condição, limite, filtro e valor padrão que o diff escreve, mais os filtros antigos de consulta que passa a devolver mais. Cada um precisa de um item na lista de falhas da descrição do PR. Regra sem item é achado |
-| 4 | **Sabotagem** | Cada item da lista tem teste que fica vermelho quando a regra é quebrada. Conferir na descrição e reproduzir uma amostra (abaixo), priorizando as regras que o item 3 achou fora da lista |
+| 4 | **Sabotagem** | Cada item da lista tem teste que fica vermelho quando a regra é quebrada. Conferir na descrição e reproduzir uma amostra (abaixo), priorizando as regras que o item 3 achou fora da lista. Caso barrado em mais de um ponto: quebrar um ponto por vez; ponto que some sem teste vermelho é achado, e ponto sem motivo próprio é achado de código que sobra. Teste cuja asserção depende de algo que ele não controla (outro teste, ordem de execução, relógio, dado que já estava no banco) também é achado, com o cenário em que fica vermelho sem bug |
 | 5 | **Portão** | CI verde (`gh pr checks`) e cada item do checklist do template cumprido |
 | 6 | **Bug** | Nenhum comportamento errado com cenário concreto (entrada → resultado errado) que os testes não pegam |
 
@@ -161,6 +161,21 @@ critérios.
 
 Achado sem critério e sem evidência não é bloqueante. É observação.
 
+**Observação só entra no rascunho com risco concreto:** um cenário que quebra
+algo, agora ou num momento que dá para nomear ("a IA-3 vai consultar o banco
+por esse serviço"). Fica fora:
+
+- preferência ou alternativa equivalente: se a revisão não sabe dizer qual
+  opção é melhor, não é observação;
+- registro que não protege nada, como regra sem item na lista quando o CI já
+  quebra se ela sair;
+- o que só existe para mostrar que a revisão olhou com cuidado.
+
+Cada observação diz **quando** fazer: neste PR, porque é barato e o risco já
+existe, ou numa task depois, com o motivo. Observação não é fila de commits:
+aplicar uma gera código novo, que gera observação nova. Revisão sem observação
+que passe no filtro sai sem a seção.
+
 Decisão de produto que o PR levanta (algo que nenhum card, ADR ou documento
 decide) não bloqueia o código. Vai num bloco próprio, para o usuário decidir.
 
@@ -187,7 +202,7 @@ decide) não bloqueia o código. Vai num bloco próprio, para o usuário decidir
 - a pergunta, e por que nenhum documento a responde.
 
 ## Não precisa fazer nada disso para mesclar
-- observações, sem limite de quantidade.
+- observação com o cenário de risco e quando fazer (neste PR ou numa task depois).
 ```
 
 Na rodada de conferência, antes da tabela: a lista dos itens anteriores com
