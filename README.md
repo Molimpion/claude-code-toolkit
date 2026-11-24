@@ -45,25 +45,13 @@ As skills são agnósticas de stack: detectam a linguagem em runtime e leem o co
 
 A pasta [`ai-memory/`](ai-memory/) roda o [ai-memory](https://github.com/akitaonrails/ai-memory) num container próprio e o liga aos devcontainers: hooks registram cada sessão, a seguinte recebe um resumo do que ficou em aberto e o agente pesquisa a memória por MCP. Os atalhos `dc`/`dcr`/`dcsh` de [`ai-memory/dc.sh`](ai-memory/dc.sh) ligam o container à rede do servidor e passam a chave, sem configuração por projeto. Um filtro garante que prompt barrado por conter segredo não seja gravado. Riscos e instalação no [README da pasta](ai-memory/README.md).
 
-## Antigravity CLI
+## Antigravity
 
-[`antigravity/plugin/`](antigravity/plugin/) leva os mesmos guardrails para o `agy`, como plugin. O `adaptar.py` traduz o payload do `agy` para o formato do Claude Code e chama os hooks de `hooks/`, então cada regra continua escrita num lugar só:
+Tudo o que adapta o toolkit para o Antigravity (app e CLI `agy`) vive em [`antigravity/`](antigravity/README.md):
 
-- `SessionStart`: o Antigravity carrega só os primeiros 24.000 bytes de cada arquivo de regra; quando o `AGENTS.md` da raiz do workspace passa disso, o resto entra na conversa como mensagem de sistema.
-- `PreInvocation`: filtro de segredo no prompt; prompt barrado encerra o turno antes do modelo.
-- `PreToolUse`: trava do arquivo de segredos; sem bloqueio, responde `ask`, que devolve a decisão às permissões do `agy` (sem `decision`, o `agy` nega a ferramenta).
-- `PostToolUse`: log de escrita, com a ferramenta marcada como `agy:`.
-- ai-memory nos quatro eventos, só quando o prompt passa no filtro de segredo. A resposta `allow` dos hooks dele é descartada.
+- [`antigravity/plugin/`](antigravity/plugin/): plugin `toolkit-hooks`, com o `adaptar.py` completando o `AGENTS.md` que passa de 24.000 bytes no `SessionStart`, traduzindo o payload do `agy` para os hooks de `~/.claude/hooks/` (`PreInvocation` para segredos no prompt, `PreToolUse` para trava de `.env`, `PostToolUse` para log de escrita) e repassando os eventos ao `ai-memory` após o filtro de segredos.
 
-```bash
-~/.claude/toolkit/ai-memory/instalar-hooks.sh
-ln -s ../../../.claude/toolkit/antigravity/plugin ~/.gemini/config/plugins/toolkit-hooks
-agy plugin validate ~/.gemini/config/plugins/toolkit-hooks
-```
-
-O `instalar-hooks.sh` também extrai os hooks do ai-memory para o `agy`. O link é relativo pelo mesmo motivo das skills.
-
-No devcontainer, o atalho `dca` abre o `agy` no mesmo container do `dc`. Login, risco do token do Google e limitações em [`docs/antigravity.md`](docs/antigravity.md).
+Instalação completa, funcionamento da adaptação e regras locais por projeto em [`antigravity/README.md`](antigravity/README.md). No devcontainer, o atalho `dca` abre o `agy` no mesmo container do `dc`; login, risco do token do Google e limitações em [`docs/antigravity.md`](docs/antigravity.md).
 
 ## Status line
 

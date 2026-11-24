@@ -18,8 +18,7 @@ arquivo some sem aviso, pelo mesmo motivo das skills do Claude no README.
 
 ## Hooks
 
-O plugin está em [`antigravity/plugin/`](../antigravity/plugin/). Instalação e o que cada
-evento faz: seção "Antigravity CLI" do [README](../README.md).
+O plugin está em [`antigravity/plugin/`](../antigravity/plugin/). Arquitetura da adaptação, instalação e o que cada evento faz: [`antigravity/README.md`](../antigravity/README.md) e seção "Antigravity" do [README](../README.md).
 
 O que mudou em relação ao Claude, medido no `agy` 1.5.4:
 
