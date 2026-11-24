@@ -116,7 +116,13 @@ Comunicação sempre em **português do Brasil**.
   mudança faz uma consulta que já existia devolver mais dado, os filtros
   antigos dela (dono, conta ativa, situação, cada lado de uma lista) também são
   quebrados de propósito: o dado que passa a sair aumenta o custo de o filtro
-  sumir, e nenhum teste novo o cobre sozinho.
+  sumir, e nenhum teste novo o cobre sozinho. Se o mesmo caso é barrado em mais de
+  um ponto, cada ponto precisa de um motivo próprio. Com motivo, ganha um teste
+  que fica vermelho quando só ele some. Sem motivo, um dos dois sobra.
+- **O resultado do teste depende só do próprio teste.** Se a asserção pode
+  mudar por causa de outro teste, da ordem de execução, do relógio ou de dado
+  que já estava lá, o teste é instável: restrinja a asserção ao que ele mesmo
+  criou e controla.
 - **Nada de dead code nem feature pela metade.** Se precisar deixar algo pra
   depois, marque como TODO com o motivo, não deixe função vazia.
 
